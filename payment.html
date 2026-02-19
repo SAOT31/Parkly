@@ -8,6 +8,14 @@
     <script src="js/tailwind-config.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+      (function() {
+          // Tu Public Key real
+          emailjs.init("un4LYOPByGrPFvTDj"); 
+      })();
+    </script>
 </head>
 <body class="bg-background text-foreground min-h-screen font-sans antialiased">
 
@@ -41,22 +49,18 @@
                     <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
                         <i data-lucide="smartphone" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
                         <span class="text-sm font-bold text-white">Nequi</span>
-                        <span class="text-[10px] text-slate-500">Mobile App</span>
                     </button>
                     <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
                         <i data-lucide="building-2" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
                         <span class="text-sm font-bold text-white">PSE</span>
-                        <span class="text-[10px] text-slate-500">Bank Debit</span>
                     </button>
                     <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
                         <i data-lucide="smartphone-charging" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
                         <span class="text-sm font-bold text-white">Daviplata</span>
-                        <span class="text-[10px] text-slate-500">Mobile App</span>
                     </button>
                     <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
                         <i data-lucide="credit-card" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
                         <span class="text-sm font-bold text-white">Card</span>
-                        <span class="text-[10px] text-slate-500">Credit/Debit</span>
                     </button>
                 </div>
 
@@ -92,7 +96,8 @@
                         </div>
                         <div class="flex justify-between text-slate-400">
                             <span>Service fee</span>
-                            <span class="text-white font-medium">$ 0</span> </div>
+                            <span class="text-green-500 font-bold uppercase text-[10px]">Free</span> 
+                        </div>
                     </div>
 
                     <div class="border-t border-border mt-6 pt-4 flex justify-between items-center">
@@ -107,6 +112,9 @@
 
     <script src="js/data.js"></script>
     <script src="js/payment.js"></script>
-    <script>lucide.createIcons();</script>
+    <script>
+        // Renderizar iconos de Lucide al cargar
+        lucide.createIcons();
+    </script>
 </body>
 </html>
