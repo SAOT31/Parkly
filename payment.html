@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Reservation - PARKLY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-background text-foreground min-h-screen font-sans antialiased">
+
+    <main class="max-w-5xl mx-auto px-6 py-10 flex items-center justify-center min-h-screen">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 w-full">
+            
+            <section class="lg:col-span-3 space-y-8">
+                <a href="#" onclick="history.back()" class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to details
+                </a>
+
+                <div>
+                    <h1 class="text-3xl font-extrabold text-white mb-2">Pay Reservation</h1>
+                    <p class="text-slate-400">Select your preferred payment method and duration.</p>
+                </div>
+
+                <div class="bg-card border border-border p-6 rounded-2xl">
+                    <h3 class="flex items-center gap-2 text-sm font-bold text-white mb-4">
+                        <i data-lucide="clock" class="text-primary w-4 h-4"></i> Reservation Duration
+                    </h3>
+                    <div class="grid grid-cols-4 gap-4" id="duration-selector">
+                        <button data-hours="1" class="duration-btn active py-3 rounded-xl border border-primary bg-primary/20 text-white font-bold transition-all">1h</button>
+                        <button data-hours="3" class="duration-btn py-3 rounded-xl border border-border bg-[#0f172a] text-slate-400 hover:text-white transition-all">3h</button>
+                        <button data-hours="6" class="duration-btn py-3 rounded-xl border border-border bg-[#0f172a] text-slate-400 hover:text-white transition-all">6h</button>
+                        <button data-hours="12" class="duration-btn py-3 rounded-xl border border-border bg-[#0f172a] text-slate-400 hover:text-white transition-all">12h</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
+                        <i data-lucide="smartphone" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
+                        <span class="text-sm font-bold text-white">Nequi</span>
+                        <span class="text-[10px] text-slate-500">Mobile App</span>
+                    </button>
+                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
+                        <i data-lucide="building-2" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
+                        <span class="text-sm font-bold text-white">PSE</span>
+                        <span class="text-[10px] text-slate-500">Bank Debit</span>
+                    </button>
+                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
+                        <i data-lucide="smartphone-charging" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
+                        <span class="text-sm font-bold text-white">Daviplata</span>
+                        <span class="text-[10px] text-slate-500">Mobile App</span>
+                    </button>
+                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
+                        <i data-lucide="credit-card" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
+                        <span class="text-sm font-bold text-white">Card</span>
+                        <span class="text-[10px] text-slate-500">Credit/Debit</span>
+                    </button>
+                </div>
+
+                <button id="btn-pay" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 text-lg transition-all active:scale-[0.98]">
+                    Pay $ <span id="btn-total">0</span>
+                </button>
+                
+                <p class="text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <i data-lucide="lock" class="w-3 h-3"></i> Secure payment with 256-bit SSL encryption
+                </p>
+            </section>
+
+            <aside class="lg:col-span-2">
+                <div class="bg-card border border-border p-6 rounded-3xl sticky top-24">
+                    <h3 class="font-bold text-white mb-6 border-b border-border pb-4">Reservation Summary</h3>
+                    
+                    <div class="flex gap-4 mb-6">
+                        <img id="summary-img" src="" class="w-20 h-20 rounded-xl object-cover bg-slate-800">
+                        <div>
+                            <h4 id="summary-name" class="font-bold text-white leading-tight mb-1">Loading...</h4>
+                            <p id="summary-address" class="text-xs text-slate-400">...</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between text-slate-400">
+                            <span>Rate per hour</span>
+                            <span class="text-white font-medium" id="summary-rate">$ 0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-400">
+                            <span>Duration</span>
+                            <span class="text-white font-medium" id="summary-duration">1 hour</span>
+                        </div>
+                        <div class="flex justify-between text-slate-400">
+                            <span>Service fee</span>
+                            <span class="text-white font-medium">$ 0</span> </div>
+                    </div>
+
+                    <div class="border-t border-border mt-6 pt-4 flex justify-between items-center">
+                        <span class="text-lg font-bold text-white">Total</span>
+                        <span class="text-2xl font-black text-primary" id="summary-total">$ 0</span>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/payment.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

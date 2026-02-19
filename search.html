@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Parking - PARKLY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('parkly_theme') || 'dark';
+            document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+        })();
+    </script>
+</head>
+<body class="bg-background text-foreground min-h-screen font-sans antialiased transition-colors duration-300">
+
+    <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
+        <nav class="max-w-7xl mx-auto flex justify-between items-center" aria-label="Main Navigation">
+            <a href="index.html" class="flex items-center gap-2 font-bold text-xl text-white group">
+                <i data-lucide="circle-parking" class="text-primary group-hover:rotate-12 transition-transform"></i>
+                <span class="tracking-tighter uppercase italic">PARK<span class="text-primary">LY</span></span>
+            </a>
+            
+            <div class="flex-1 max-w-xl mx-8 flex gap-2">
+                <div class="relative flex-1">
+                    <label for="nav-search-input" class="sr-only">Search</label>
+                    <i data-lucide="search" class="absolute left-3 top-2.5 h-4 w-4 text-slate-500"></i>
+                    <input 
+                        type="search" 
+                        id="nav-search-input" 
+                        placeholder="Search by name or location..." 
+                        class="w-full bg-card border border-border rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:border-primary focus:outline-none transition-all"
+                    >
+                </div>
+                <button id="btn-execute-search" class="bg-primary text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:bg-blue-600 transition-all">
+                    <i data-lucide="search" class="h-4 w-4"></i> Search
+                </button>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <a href="admin-dash.html" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Panel Admin</a>
+                
+                <div class="flex items-center gap-2 border border-border rounded-full px-3 py-1 bg-[#1e293b]">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                    <span class="text-xs font-bold text-white uppercase tracking-tighter">Admin <span class="text-[10px] bg-blue-900/50 text-blue-300 px-1 rounded ml-1">Admin</span></span>
+                </div>
+
+                <div class="flex items-center gap-3 border-l border-border pl-4">
+                    <button id="btn-logout" class="text-gray-500 hover:text-red-500 transition-all"><i data-lucide="log-out" class="h-5 w-5"></i></button>
+                    <button id="theme-toggle" class="text-gray-500 hover:text-yellow-400 transition-all"></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-10">
+        <header class="mb-10">
+            <h1 class="text-4xl font-extrabold text-white mb-3 tracking-tight">Find your <span class="text-primary">perfect spot</span></h1>
+            <p class="text-slate-400 text-lg">Reserve verified, secure, and illuminated spaces in Bogotá and Medellín.</p>
+        </header>
+
+        <section id="filters" class="mb-10" aria-label="Search filters">
+            <div id="filter-bar" class="flex flex-wrap items-center gap-2.5">
+                <button data-filter="all" class="filter-chip active flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider transition-all">
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> Filters
+                </button>
+                <button data-filter="verified" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Verified
+                </button>
+                <button data-filter="is24h" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 24 Hours
+                </button>
+                <button data-filter="evCharging" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i> EV Charging
+                </button>
+                <button data-filter="hasSecurity" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i> Security
+                </button>
+                <button data-filter="isIlluminated" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
+                    <i data-lucide="sun" class="w-3.5 h-3.5"></i> Illuminated
+                </button>
+                <button data-filter="available" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Available
+                </button>
+                <button id="btn-clear-filters" class="text-[11px] font-black text-red-500 uppercase tracking-widest ml-4 hover:underline">Clear all</button>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                <span id="spot-count">0</span> parking spots found
+            </h2>
+        </section>
+
+        <section id="spots-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></section>
+
+        <section id="empty-state" class="hidden py-32 text-center animate-fade-in" aria-live="polite">
+            <i data-lucide="map-pin-off" class="mx-auto h-16 w-16 text-slate-800 mb-6"></i>
+            <h3 class="text-xl font-bold text-slate-500">No spots found matching your filters</h3>
+        </section>
+    </main>
+
+    <footer class="border-t border-border bg-[#020617] py-8 text-center text-xs text-slate-500 uppercase tracking-widest">
+        <p>PARKLY &copy; 2026. All rights reserved.</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/search.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

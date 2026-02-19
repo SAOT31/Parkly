@@ -1,0 +1,41 @@
+/* ARCHIVO: css/styles.css */
+/* DESCRIPCIÓN: Variables de color HSL para soporte de modo claro y oscuro con transiciones */
+
+:root {
+    /* MODO CLARO (Default) */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --primary: 217 91% 60%;
+    --card: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+}
+
+.dark {
+    /* MODO OSCURO (Basado en tus capturas de pantalla) */
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --card: 217 33% 12%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+}
+
+/* Transición suave para el cambio de tema */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    margin: 0;
+}
+
+/* Chips de filtros activos */
+.filter-chip.active {
+    background-color: hsl(var(--primary) / 0.2);
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary));
+}
