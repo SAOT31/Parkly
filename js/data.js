@@ -38,7 +38,12 @@ const DB = {
         const users = JSON.parse(localStorage.getItem('parkly_users')) || [];
         const user = users.find(u => u.email === email && u.password === password);
         if (user) {
-            localStorage.setItem('parkly_session', JSON.stringify(user));
+            // Guardar sesión en LocalStorage
+            localStorage.setItem('parkly_session', JSON.stringify({
+                username: user.name,
+                email: user.email,
+                role: user.role
+            }));
             return user;
         }
         return null;

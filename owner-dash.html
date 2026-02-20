@@ -59,6 +59,9 @@
                 <button data-tab="earnings" class="flex-1 py-3 text-sm font-medium text-slate-400 hover:text-white transition-all">Earnings</button>
             </nav>
 
+            <!-- Notification Banner for owner (shown when there are pending/rejected notifications) -->
+            <div id="owner-notifications" class="mb-6 space-y-3"></div>
+
             <section id="owner-tab-content" class="animate-fade-in min-h-[400px]"></section>
         </div>
 
@@ -178,11 +181,12 @@
                 </div>
 
                 <div class="wizard-step hidden text-center py-10" id="step-4">
-                    <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500 animate-pulse">
-                        <i data-lucide="check-circle" class="w-8 h-8"></i>
+                    <div class="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-400 animate-pulse">
+                        <i data-lucide="clock" class="w-8 h-8"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">All Set!</h2>
-                    <p class="text-slate-400 text-sm mb-8">Your parking spot has been created and is now visible to drivers.</p>
+                    <h2 class="text-2xl font-bold text-white mb-2">Request Sent!</h2>
+                    <p class="text-slate-400 text-sm mb-2">Your spot has been submitted for admin review.</p>
+                    <p class="text-slate-500 text-xs mb-8">You will receive a notification once the admin approves or rejects your request.</p>
                     <button type="button" id="btn-finish-wizard" class="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-primary/20">
                         Go to Dashboard
                     </button>
