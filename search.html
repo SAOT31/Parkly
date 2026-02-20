@@ -8,6 +8,7 @@
     <script src="js/tailwind-config.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="IA/chatbox.css">
     
     <script>
         (function() {
@@ -102,6 +103,68 @@
             <i data-lucide="map-pin-off" class="mx-auto h-16 w-16 text-slate-800 mb-6"></i>
             <h3 class="text-xl font-bold text-slate-500">No spots found matching your filters</h3>
         </section>
+
+
+<!-- Botón flotante -->
+<button id="chatbox-toggle" aria-label="Abrir chat de soporte">
+    <span class="notif-dot"></span>
+    <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+</button>
+
+<!-- Panel de chat -->
+<div id="chatbox-panel" role="dialog" aria-modal="true" aria-label="Chat de soporte PARKLY">
+
+    <!-- Header -->
+    <div class="chat-header">
+        <div class="chat-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4l3 3"/>
+            </svg>
+        </div>
+        <div class="chat-header-info">
+            <h3>PARK<span style="color:#3b82f6">LY</span> Support</h3>
+            <p>Online — responding instantly</p>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div id="chatbox-messages">
+        <div class="chat-bubble bot">
+            👋 Hey! I'm the <strong>PARKLY assistant</strong>. How can I help you today?
+        </div>
+        <div class="quick-replies">
+            <button class="quick-reply-btn" data-msg="Find available spots">🅿️ Find spots</button>
+            <button class="quick-reply-btn" data-msg="How do I reserve a spot?">📋 How to reserve</button>
+            <button class="quick-reply-btn" data-msg="EV charging locations">⚡ EV Charging</button>
+            <button class="quick-reply-btn" data-msg="Pricing info">💳 Pricing</button>
+        </div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+        <textarea id="chatbox-input" rows="1" placeholder="Type a message..."></textarea>
+        <button id="chatbox-send" aria-label="Send message">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+
+        
+
     </main>
 
     <footer class="border-t border-border bg-[#020617] py-8 text-center text-xs text-slate-500 uppercase tracking-widest">
@@ -112,5 +175,6 @@
     <script src="js/app.js"></script>
     <script src="js/search.js"></script>
     <script>lucide.createIcons();</script>
+    <script src="IA/chatbox.js"></script>
 </body>
 </html>
