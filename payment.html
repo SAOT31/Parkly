@@ -45,27 +45,14 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
-                        <i data-lucide="smartphone" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
-                        <span class="text-sm font-bold text-white">Nequi</span>
-                    </button>
-                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
-                        <i data-lucide="building-2" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
-                        <span class="text-sm font-bold text-white">PSE</span>
-                    </button>
-                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
-                        <i data-lucide="smartphone-charging" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
-                        <span class="text-sm font-bold text-white">Daviplata</span>
-                    </button>
-                    <button class="payment-method border border-border bg-card p-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-all group focus:border-primary focus:bg-primary/5">
-                        <i data-lucide="credit-card" class="w-6 h-6 text-slate-400 group-hover:text-primary"></i>
-                        <span class="text-sm font-bold text-white">Card</span>
-                    </button>
-                </div>
 
-                <button id="btn-pay" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 text-lg transition-all active:scale-[0.98]">
-                    Pay $ <span id="btn-total">0</span>
+
+                <button id="btn-pay-wompi" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 text-lg transition-all active:scale-[0.98]">
+                    Pay with Wompi $ <span id="btn-total-wompi">0</span>
+                </button>
+
+                <button id="btn-pay-simulate" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl border border-border shadow-lg text-lg transition-all active:scale-[0.98] mt-4">
+                    Pay $ <span id="btn-total-simulate">0</span> (Simulated)
                 </button>
                 
                 <p class="text-center text-xs text-slate-500 flex items-center justify-center gap-2">
@@ -116,5 +103,6 @@
         // Renderizar iconos de Lucide al cargar
         lucide.createIcons();
     </script>
+    <script type="text/javascript" src="https://checkout.wompi.co/widget.js"></script>
 </body>
 </html>

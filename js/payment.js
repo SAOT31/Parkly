@@ -1,10 +1,11 @@
 /**
  * ARCHIVO: js/payment.js
- * DESCRIPCIÓN: Lógica para calcular precios, simular pago y enviar comprobante real vía EmailJS.
+ * DESCRIPCIÓN: Gestión de pagos con Wompi y simulación con envío de EmailJS.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    // --- 1. CONFIGURACIÓN INICIAL ---
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     const spots = JSON.parse(localStorage.getItem('parkly_spots')) || [];
@@ -16,13 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- 1. REFERENCIAS DOM ---
+    // --- 2. REFERENCIAS DOM ---
     const durationBtns = document.querySelectorAll('.duration-btn');
-    const paymentMethods = document.querySelectorAll('.payment-method');
-    const btnPay = document.getElementById('btn-pay');
-    const btnTotalSpan = document.getElementById('btn-total');
     
-    // Summary DOM
+    // Botones de acción
+    const btnWompi = document.getElementById('btn-pay-wompi');
+    const btnSimulate = document.getElementById('btn-pay-simulate');
+    
+    // Spans de precio en los botones
+    const btnTotalWompi = document.getElementById('btn-total-wompi');
+    const btnTotalSimulate = document.getElementById('btn-total-simulate');
+    
+    // Resumen lateral (UI)
     const sumImg = document.getElementById('summary-img');
     const sumName = document.getElementById('summary-name');
     const sumAddr = document.getElementById('summary-address');
@@ -30,36 +36,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const sumDur = document.getElementById('summary-duration');
     const sumTotal = document.getElementById('summary-total');
 
-    // --- 2. ESTADO INICIAL ---
+    // --- 3. ESTADO DEL PAGO ---
     let hours = 1;
     let pricePerHour = spot.price;
 
-    // Cargar datos estáticos del parqueadero seleccionado
+    // Poblar datos estáticos
     if (sumImg) sumImg.src = spot.image;
     if (sumName) sumName.innerText = spot.name;
     if (sumAddr) sumAddr.innerText = spot.address;
     if (sumRate) sumRate.innerText = `$ ${pricePerHour.toLocaleString()}`;
 
-    // --- 3. FUNCIÓN DE RECALCULO ---
+    // --- 4. FUNCIÓN DE RECALCULO ---
     const updateTotals = () => {
         const total = hours * pricePerHour;
         const totalStr = `$ ${total.toLocaleString()}`;
         
+        // Actualizar resumen lateral
         if (sumDur) sumDur.innerText = `${hours} hour${hours > 1 ? 's' : ''}`;
         if (sumTotal) sumTotal.innerText = totalStr;
-        if (btnTotalSpan) btnTotalSpan.innerText = total.toLocaleString();
+        
+        // Actualizar números dentro de los botones
+        if (btnTotalWompi) btnTotalWompi.innerText = total.toLocaleString();
+        if (btnTotalSimulate) btnTotalSimulate.innerText = total.toLocaleString();
     };
 
-    // --- 4. EVENTOS DE INTERFAZ ---
-
-    // Selección de Duración
+    // --- 5. EVENTOS DE INTERFAZ ---
     durationBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             durationBtns.forEach(b => {
                 b.classList.remove('active', 'border-primary', 'bg-primary/20', 'text-white');
                 b.classList.add('border-border', 'bg-[#0f172a]', 'text-slate-400');
             });
-            btn.classList.remove('border-border', 'bg-[#0f172a]', 'text-slate-400');
             btn.classList.add('active', 'border-primary', 'bg-primary/20', 'text-white');
             
             hours = parseInt(btn.getAttribute('data-hours'));
@@ -67,89 +74,105 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Selección de Método de Pago (Visual)
-    paymentMethods.forEach(btn => {
-        btn.addEventListener('click', () => {
-            paymentMethods.forEach(b => b.classList.remove('border-primary', 'bg-primary/5'));
-            btn.classList.add('border-primary', 'bg-primary/5');
+    // --- 6. LÓGICA DE BOTÓN 1: WOMPI ---
+    if (btnWompi) {
+        btnWompi.addEventListener('click', () => {
+            const session = JSON.parse(localStorage.getItem('parkly_session'));
+            if (!validarSesion(session)) return;
+
+            const totalAmount = pricePerHour * hours;
+            const resId = `PK-WMP-${Math.floor(Math.random() * 1000000)}`;
+
+            var checkout = new WidgetCheckout({
+                currency: 'COP',
+                amountInCents: totalAmount * 100,
+                reference: resId,
+                publicKey: 'pub_test_5YLBFidfXmksfQX5KonhVOD7bmVTeWma', 
+                customerData: {
+                    email: session.email,
+                    fullName: session.name
+                }
+            });
+
+            checkout.open(function (result) {
+                if (result.transaction.status === 'APPROVED') {
+                    ejecutarFlujoExito(session, spot, totalAmount, hours, resId);
+                } else {
+                    alert("Pago fallido en Wompi: " + result.transaction.status);
+                }
+            });
         });
-    });
+    }
 
-    // --- 5. ACCIÓN DE PAGAR Y ENVÍO DE EMAIL ---
-    btnPay.addEventListener('click', () => {
-        const session = JSON.parse(localStorage.getItem('parkly_session'));
-        
+    // --- 7. LÓGICA DE BOTÓN 2: SIMULACIÓN DIRECTA ---
+    if (btnSimulate) {
+        btnSimulate.addEventListener('click', () => {
+            const session = JSON.parse(localStorage.getItem('parkly_session'));
+            if (!validarSesion(session)) return;
+
+            const totalAmount = pricePerHour * hours;
+            const resId = `PK-SIM-${Math.floor(Math.random() * 1000000)}`;
+
+            btnSimulate.innerText = "Processing...";
+            btnSimulate.disabled = true;
+
+            ejecutarFlujoExito(session, spot, totalAmount, hours, resId);
+        });
+    }
+
+    // --- 8. FUNCIONES MAESTRAS ---
+
+    function validarSesion(session) {
         if (!session) {
-            alert("¡Pausa! No hay sesión iniciada. Redirigiendo...");
+            alert("Inicia sesión para continuar");
             window.location.href = 'login.html';
-            return;
+            return false;
         }
+        return true;
+    }
 
-        // Feedback visual de carga
-        const originalContent = btnPay.innerHTML;
-        btnPay.disabled = true;
-        btnPay.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> Procesando Pago...`;
-        if (window.lucide) lucide.createIcons();
+    function ejecutarFlujoExito(session, spot, total, hrs, resId) {
+        // A. Enviar Correo
+        const templateParams = {
+            user_name: session.name,
+            user_email: session.email,
+            spot_name: spot.name,
+            spot_address: spot.address,
+            rate_per_hour: spot.price.toLocaleString(),
+            duration: `${hrs} hour(s)`,
+            total_pay: total.toLocaleString(),
+            reservation_id: resId
+        };
 
-        console.log("🚀 Iniciando proceso de pago para:", session.email);
+        emailjs.send('service_x9pofkj', 'template_pj5pume', templateParams)
+            .then(() => {
+                alert(`¡Pago Exitoso! Comprobante enviado a ${session.email}`);
+                
+                // B. Guardar localmente
+                guardarEnHistorial(resId, session, spot, total, hrs);
+                
+                // C. Redirigir
+                window.location.href = 'search.html';
+            })
+            .catch(err => {
+                console.error("EmailJS Error:", err);
+                alert("Pago aprobado, pero hubo un error enviando el correo.");
+            });
+    }
 
-        setTimeout(() => {
-            const resId = `PK-${Math.floor(Math.random() * 1000000)}`;
-            const finalPrice = pricePerHour * hours;
-            
-            // Parámetros para tu plantilla template_pj5pume
-            const templateParams = {
-                user_name: session.name,
-                user_email: session.email, // Asegúrate de tener {{user_email}} en el "To Email" de EmailJS
-                spot_name: spot.name,
-                address: spot.address,
-                total: finalPrice.toLocaleString(),
-                duration: hours,
-                reservation_id: resId
-            };
+    function guardarEnHistorial(resId, session, spot, total, hrs) {
+        const reservations = JSON.parse(localStorage.getItem('parkly_reservations')) || [];
+        reservations.push({
+            id: resId,
+            user: session.name,
+            spot: spot.name,
+            amount: total,
+            hours: hrs,
+            date: new Date().toLocaleString()
+        });
+        localStorage.setItem('parkly_reservations', JSON.stringify(reservations));
+    }
 
-            // --- ENVÍO DE EMAIL REAL CON TUS IDs ---
-            emailjs.send('service_x9pofkj', 'template_pj5pume', templateParams)
-                .then(() => {
-                    console.log('✅ Correo enviado con éxito a EmailJS');
-                    
-                    // 1. GUARDAR RESERVA GLOBAL
-                    const reservations = JSON.parse(localStorage.getItem('parkly_reservations')) || [];
-                    const newReservation = {
-                        id: resId,
-                        user: session.name,
-                        userEmail: session.email,
-                        spot: spot.name,
-                        amount: finalPrice,
-                        date: new Date().toLocaleDateString(),
-                        status: 'Completed',
-                        payment: 'Simulated Card'
-                    };
-                    reservations.push(newReservation);
-                    localStorage.setItem('parkly_reservations', JSON.stringify(reservations));
-
-                    // 2. ACTUALIZAR GANANCIAS DEL DUEÑO
-                    const allSpots = JSON.parse(localStorage.getItem('parkly_spots')) || [];
-                    const spotIndex = allSpots.findIndex(s => s.id == spot.id);
-                    if (spotIndex !== -1) {
-                        allSpots[spotIndex].earnings = (allSpots[spotIndex].earnings || 0) + finalPrice;
-                        localStorage.setItem('parkly_spots', JSON.stringify(allSpots));
-                    }
-
-                    alert(`¡Pago Exitoso! Comprobante enviado a: ${session.email}`);
-                    window.location.href = 'search.html';
-                    
-                }, (error) => {
-                    console.error('❌ Error de EmailJS:', error);
-                    alert("Simulación fallida: Revisa que tu Public Key y IDs sean correctos.");
-                    btnPay.disabled = false;
-                    btnPay.innerHTML = originalContent;
-                    if (window.lucide) lucide.createIcons();
-                });
-
-        }, 1500);
-    });
-
-    // Inicializar totales al cargar la página
+    // Inicializar valores
     updateTotals();
 });
