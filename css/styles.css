@@ -39,3 +39,37 @@ body {
     border-color: hsl(var(--primary));
     color: hsl(var(--primary));
 }
+/* ── Toggle switches (search sidebar) ── */
+.toggle-track {
+    width: 36px; height: 20px;
+    background: hsl(var(--border));
+    border-radius: 999px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.toggle-track.on { background: hsl(var(--primary)); }
+.toggle-knob {
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px; left: 3px;
+    transition: left 0.2s;
+}
+.toggle-track.on .toggle-knob { left: 19px; }
+
+/* ── Sort options (search sidebar) ── */
+.sort-opt {
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: hsl(var(--foreground) / 0.5);
+    transition: all 0.15s;
+}
+.sort-opt:hover  { color: hsl(var(--foreground)); background: hsl(var(--border) / 0.4); }
+.sort-opt.active { background: hsl(var(--primary) / 0.15); color: hsl(var(--primary)); }

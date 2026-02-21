@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings — PARKLY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            const t = localStorage.getItem('parkly_theme');
+            if (t === 'light') document.documentElement.classList.remove('dark');
+        })();
+    </script>
+</head>
+<body class="bg-background text-foreground min-h-screen font-sans antialiased">
+
+    <!-- ── NAVBAR ── -->
+    <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
+        <nav class="max-w-5xl mx-auto flex justify-between items-center" aria-label="Main navigation">
+            <a href="index.html" aria-label="Parkly home"
+                class="flex items-center gap-2 font-bold text-xl text-white group">
+                <i data-lucide="circle-parking" class="text-primary group-hover:rotate-12 transition-transform" aria-hidden="true"></i>
+                <span class="tracking-tighter uppercase italic">PARK<span class="text-primary">LY</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="search.html" class="text-sm text-slate-400 hover:text-white transition-colors">Search</a>
+                <a href="dashboard.html" class="text-sm text-primary font-semibold">My Bookings</a>
+                <div class="flex items-center gap-2 border border-border rounded-full px-3 py-1 bg-[#1e293b]"
+                     role="status" aria-label="Current user">
+                    <span id="nav-username" class="text-xs font-bold text-white">Guest</span>
+                    <span class="text-[10px] bg-blue-900/50 text-blue-300 px-1.5 rounded font-black uppercase">Driver</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ── MAIN ── -->
+    <main class="max-w-5xl mx-auto px-6 py-10">
+
+        <header class="mb-8">
+            <h1 class="text-3xl font-extrabold text-white mb-1">My Bookings</h1>
+            <p id="dash-subtitle" class="text-slate-400"></p>
+        </header>
+
+        <!-- Tabs -->
+        <nav aria-label="Booking filter tabs">
+            <ul class="flex gap-1 bg-card border border-border rounded-xl p-1 w-fit mb-8 list-none" role="tablist">
+                <li role="presentation">
+                    <button id="tab-all" role="tab" aria-selected="true" data-tab="all"
+                        aria-controls="reservations-panel"
+                        class="tab-btn px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all text-white bg-primary">
+                        All
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button id="tab-active" role="tab" aria-selected="false" data-tab="active"
+                        aria-controls="reservations-panel"
+                        class="tab-btn px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all text-slate-400 hover:text-white">
+                        Active
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button id="tab-completed" role="tab" aria-selected="false" data-tab="completed"
+                        aria-controls="reservations-panel"
+                        class="tab-btn px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all text-slate-400 hover:text-white">
+                        Completed
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button id="tab-cancelled" role="tab" aria-selected="false" data-tab="cancelled"
+                        aria-controls="reservations-panel"
+                        class="tab-btn px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all text-slate-400 hover:text-white">
+                        Cancelled
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Lista de reservas -->
+        <section id="reservations-panel" role="tabpanel" aria-live="polite" aria-label="Reservations list">
+            <ol id="reservations-list" class="flex flex-col gap-4 list-none p-0 m-0"></ol>
+        </section>
+
+    </main>
+
+    <!-- ── REVIEW MODAL ── -->
+    <dialog id="review-dialog"
+        aria-labelledby="review-dialog-title"
+        aria-modal="true"
+        class="bg-card border border-border rounded-3xl p-8 w-full max-w-md text-foreground backdrop:bg-black/70 backdrop:backdrop-blur-sm">
+
+        <h2 id="review-dialog-title" class="text-xl font-extrabold text-white mb-1">Leave a Review</h2>
+        <p id="review-parking-name" class="text-sm text-slate-400 mb-6"></p>
+
+        <form method="dialog" onsubmit="return false">
+            <div class="mb-5">
+                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2" id="stars-label">
+                    Your Rating
+                </label>
+                <div id="review-stars" class="flex gap-2 text-4xl"
+                    role="radiogroup" aria-labelledby="stars-label">
+                    <!-- Estrellas inyectadas por JS via DOM API -->
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label for="review-comment"
+                    class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
+                    Your Review
+                </label>
+                <textarea id="review-comment" rows="4"
+                    placeholder="Share your experience with this parking spot..."
+                    class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-primary resize-none">
+                </textarea>
+            </div>
+
+            <p id="review-error" role="alert" aria-live="assertive"
+                class="hidden text-red-400 text-sm mb-3"></p>
+
+            <div class="flex gap-3">
+                <button id="review-cancel-btn" type="button"
+                    class="px-5 py-2.5 rounded-xl border border-border text-slate-400 hover:text-white hover:border-slate-500 text-sm font-semibold transition-all">
+                    Cancel
+                </button>
+                <button id="review-submit-btn" type="button"
+                    class="flex-1 bg-primary hover:opacity-90 text-white font-bold py-2.5 rounded-xl text-sm transition-all">
+                    Submit Review →
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- ── TEMPLATE: RESERVATION CARD ── -->
+    <template id="res-card-tpl">
+        <li>
+            <article class="bg-card border border-border rounded-2xl p-5 hover:border-slate-600 transition-all">
+
+                <div class="flex gap-4">
+                    <img data-field="thumb-img"
+                        class="w-24 h-20 object-cover rounded-xl flex-shrink-0 bg-slate-800 hidden" alt="">
+                    <div data-field="thumb-placeholder"
+                        class="w-24 h-20 rounded-xl bg-slate-800 flex items-center justify-center text-3xl flex-shrink-0"
+                        aria-hidden="true">🅿️</div>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <h2 data-field="name" class="font-bold text-white text-base leading-tight"></h2>
+                            <span data-field="status-badge"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true"></span>
+                                <span data-field="status-label"></span>
+                            </span>
+                        </div>
+
+                        <dl class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400 mb-3">
+                            <div class="flex items-center gap-1">
+                                <dt class="sr-only">Address</dt>
+                                <i data-lucide="map-pin" class="w-3 h-3" aria-hidden="true"></i>
+                                <dd data-field="address"></dd>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <dt class="sr-only">Date</dt>
+                                <i data-lucide="calendar" class="w-3 h-3" aria-hidden="true"></i>
+                                <dd data-field="date"></dd>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <dt class="sr-only">Time</dt>
+                                <i data-lucide="clock" class="w-3 h-3" aria-hidden="true"></i>
+                                <dd data-field="time"></dd>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <dt class="sr-only">Duration</dt>
+                                <i data-lucide="timer" class="w-3 h-3" aria-hidden="true"></i>
+                                <dd data-field="duration"></dd>
+                            </div>
+                            <div>
+                                <dt class="sr-only">Total</dt>
+                                <dd data-field="total" class="font-bold text-primary font-mono"></dd>
+                            </div>
+                        </dl>
+
+                        <p data-field="booking-id" class="text-[10px] text-slate-600 font-mono"></p>
+                    </div>
+                </div>
+
+                <!-- Progreso — visible solo si activo -->
+                <div data-field="progress-block"
+                    class="hidden mt-4 bg-background border border-border rounded-xl p-4">
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Service in Progress</p>
+                    <div class="h-1 bg-border rounded-full overflow-hidden mb-2"
+                        role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" aria-label="Service progress">
+                        <div class="h-full bg-primary rounded-full" style="width:60%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-3">
+                        Your spot is active until
+                        <strong data-field="end-time" class="text-white"></strong>
+                    </p>
+                    <button data-action="finish"
+                        class="w-full bg-primary hover:opacity-90 text-white font-bold py-2 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4" aria-hidden="true"></i>
+                        Finish Service
+                    </button>
+                </div>
+
+                <!-- Acciones condicionales -->
+                <div class="mt-4 flex flex-col gap-2">
+
+                    <button data-action="review"
+                        class="hidden w-full border border-border hover:border-primary text-slate-400 hover:text-white font-semibold py-2 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="star" class="w-4 h-4" aria-hidden="true"></i>
+                        Leave a Review
+                    </button>
+
+                    <div data-field="review-done"
+                        class="hidden items-center justify-center gap-2 text-xs font-bold text-green-400 bg-green-900/20 border border-green-800/30 rounded-xl py-2">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                        Review submitted
+                    </div>
+
+                    <button data-action="cancel"
+                        class="hidden w-full border border-red-800/50 hover:bg-red-900/20 text-red-400 font-semibold py-2 rounded-xl text-sm transition-all">
+                        Cancel Reservation
+                    </button>
+
+                    <button data-action="view"
+                        class="w-full border border-border hover:border-slate-500 text-slate-400 hover:text-white font-semibold py-2 rounded-xl text-sm transition-all">
+                        View Parking
+                    </button>
+
+                </div>
+
+            </article>
+        </li>
+    </template>
+
+    <!-- ── TEMPLATE: ESTADO VACÍO ── -->
+    <template id="res-empty-tpl">
+        <li>
+            <div class="text-center py-20 text-slate-500">
+                <div class="text-6xl mb-4" aria-hidden="true">🅿️</div>
+                <strong data-field="title" class="block text-lg text-white mb-2"></strong>
+                <p data-field="subtitle" class="text-sm mb-6"></p>
+                <a data-field="cta" href="search.html"
+                    class="hidden inline-flex items-center gap-2 bg-primary hover:opacity-90 text-white font-bold px-6 py-3 rounded-xl text-sm transition-all">
+                    Find Parking →
+                </a>
+            </div>
+        </li>
+    </template>
+
+    <script src="js/data.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
