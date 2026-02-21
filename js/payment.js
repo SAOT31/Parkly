@@ -1,10 +1,11 @@
 /**
  * ARCHIVO: js/payment.js
- * DESCRIPCIÓN: Lógica para calcular precios y simular pago.
+ * DESCRIPCIÓN: Gestión de pagos con Wompi y simulación con envío de EmailJS.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    // --- 1. CONFIGURACIÓN INICIAL ---
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     const spots = JSON.parse(localStorage.getItem('parkly_spots')) || [];
@@ -16,13 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Referencias DOM
+    // --- 2. REFERENCIAS DOM ---
     const durationBtns = document.querySelectorAll('.duration-btn');
-    const paymentMethods = document.querySelectorAll('.payment-method');
-    const btnPay = document.getElementById('btn-pay');
-    const btnTotalSpan = document.getElementById('btn-total');
     
-    // Summary DOM
+    // Botones de acción
+    const btnWompi = document.getElementById('btn-pay-wompi');
+    const btnSimulate = document.getElementById('btn-pay-simulate');
+    
+    // Spans de precio en los botones
+    const btnTotalWompi = document.getElementById('btn-total-wompi');
+    const btnTotalSimulate = document.getElementById('btn-total-simulate');
+    
+    // Resumen lateral (UI)
     const sumImg = document.getElementById('summary-img');
     const sumName = document.getElementById('summary-name');
     const sumAddr = document.getElementById('summary-address');
@@ -30,36 +36,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const sumDur = document.getElementById('summary-duration');
     const sumTotal = document.getElementById('summary-total');
 
-    // Estado inicial
+    // --- 3. ESTADO DEL PAGO ---
     let hours = 1;
     let pricePerHour = spot.price;
 
-    // Cargar datos estáticos
-    sumImg.src = spot.image;
-    sumName.innerText = spot.name;
-    sumAddr.innerText = spot.address;
-    sumRate.innerText = `$ ${pricePerHour.toLocaleString()}`;
+    // Poblar datos estáticos
+    if (sumImg) sumImg.src = spot.image;
+    if (sumName) sumName.innerText = spot.name;
+    if (sumAddr) sumAddr.innerText = spot.address;
+    if (sumRate) sumRate.innerText = `$ ${pricePerHour.toLocaleString()}`;
 
-    // Función de Recálculo
+    // --- 4. FUNCIÓN DE RECALCULO ---
     const updateTotals = () => {
         const total = hours * pricePerHour;
         const totalStr = `$ ${total.toLocaleString()}`;
         
-        sumDur.innerText = `${hours} hour${hours > 1 ? 's' : ''}`;
-        sumTotal.innerText = totalStr;
-        btnTotalSpan.innerText = total.toLocaleString();
+        // Actualizar resumen lateral
+        if (sumDur) sumDur.innerText = `${hours} hour${hours > 1 ? 's' : ''}`;
+        if (sumTotal) sumTotal.innerText = totalStr;
+        
+        // Actualizar números dentro de los botones
+        if (btnTotalWompi) btnTotalWompi.innerText = total.toLocaleString();
+        if (btnTotalSimulate) btnTotalSimulate.innerText = total.toLocaleString();
     };
 
-    // Eventos Duración
+    // --- 5. EVENTOS DE INTERFAZ ---
     durationBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remover activo de todos
             durationBtns.forEach(b => {
                 b.classList.remove('active', 'border-primary', 'bg-primary/20', 'text-white');
                 b.classList.add('border-border', 'bg-[#0f172a]', 'text-slate-400');
             });
-            // Activar actual
-            btn.classList.remove('border-border', 'bg-[#0f172a]', 'text-slate-400');
             btn.classList.add('active', 'border-primary', 'bg-primary/20', 'text-white');
             
             hours = parseInt(btn.getAttribute('data-hours'));
@@ -67,28 +74,105 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Eventos Método de Pago (Visual)
-    paymentMethods.forEach(btn => {
-        btn.addEventListener('click', () => {
-            paymentMethods.forEach(b => b.classList.remove('border-primary', 'bg-primary/5'));
-            btn.classList.add('border-primary', 'bg-primary/5');
+    // --- 6. LÓGICA DE BOTÓN 1: WOMPI ---
+    if (btnWompi) {
+        btnWompi.addEventListener('click', () => {
+            const session = JSON.parse(localStorage.getItem('parkly_session'));
+            if (!validarSesion(session)) return;
+
+            const totalAmount = pricePerHour * hours;
+            const resId = `PK-WMP-${Math.floor(Math.random() * 1000000)}`;
+
+            var checkout = new WidgetCheckout({
+                currency: 'COP',
+                amountInCents: totalAmount * 100,
+                reference: resId,
+                publicKey: 'pub_test_5YLBFidfXmksfQX5KonhVOD7bmVTeWma', 
+                customerData: {
+                    email: session.email,
+                    fullName: session.name
+                }
+            });
+
+            checkout.open(function (result) {
+                if (result.transaction.status === 'APPROVED') {
+                    ejecutarFlujoExito(session, spot, totalAmount, hours, resId);
+                } else {
+                    alert("Pago fallido en Wompi: " + result.transaction.status);
+                }
+            });
         });
-    });
+    }
 
-    // Acción de Pagar (Simulada)
-    btnPay.addEventListener('click', () => {
-        // Aquí iría la integración real (Stripe/Wompi)
-        // Por ahora, simulamos éxito.
-        
-        btnPay.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> Processing...`;
-        lucide.createIcons();
+    // --- 7. LÓGICA DE BOTÓN 2: SIMULACIÓN DIRECTA ---
+    if (btnSimulate) {
+        btnSimulate.addEventListener('click', () => {
+            const session = JSON.parse(localStorage.getItem('parkly_session'));
+            if (!validarSesion(session)) return;
 
-        setTimeout(() => {
-            alert(`Payment Successful!\nReserved ${spot.name} for ${hours} hours.`);
-            window.location.href = 'search.html'; // Volver a búsqueda o a un dashboard de cliente si existiera
-        }, 1500);
-    });
+            const totalAmount = pricePerHour * hours;
+            const resId = `PK-SIM-${Math.floor(Math.random() * 1000000)}`;
 
-    // Init
+            btnSimulate.innerText = "Processing...";
+            btnSimulate.disabled = true;
+
+            ejecutarFlujoExito(session, spot, totalAmount, hours, resId);
+        });
+    }
+
+    // --- 8. FUNCIONES MAESTRAS ---
+
+    function validarSesion(session) {
+        if (!session) {
+            alert("Inicia sesión para continuar");
+            window.location.href = 'login.html';
+            return false;
+        }
+        return true;
+    }
+
+    function ejecutarFlujoExito(session, spot, total, hrs, resId) {
+        // A. Enviar Correo
+        const templateParams = {
+            user_name: session.name,
+            user_email: session.email,
+            spot_name: spot.name,
+            spot_address: spot.address,
+            rate_per_hour: spot.price.toLocaleString(),
+            duration: `${hrs} hour(s)`,
+            total_pay: total.toLocaleString(),
+            reservation_id: resId
+        };
+
+        emailjs.send('service_x9pofkj', 'template_pj5pume', templateParams)
+            .then(() => {
+                alert(`¡Pago Exitoso! Comprobante enviado a ${session.email}`);
+                
+                // B. Guardar localmente
+                guardarEnHistorial(resId, session, spot, total, hrs);
+                
+                // C. Redirigir
+                window.location.href = 'search.html';
+            })
+            .catch(err => {
+                console.error("EmailJS Error:", err);
+                alert("Pago aprobado, pero hubo un error enviando el correo.");
+            });
+    }
+
+    function guardarEnHistorial(resId, session, spot, total, hrs) {
+        const reservations = JSON.parse(localStorage.getItem('parkly_reservations')) || [];
+        reservations.push({
+            id: resId,
+            user: session.name,
+            spot: spot.name,
+            amount: total,
+            hours: hrs,
+            date: new Date().toLocaleString()
+        });
+        localStorage.setItem('parkly_reservations', JSON.stringify(reservations));
+    }
+
+    // Inicializar valores
     updateTotals();
 });

@@ -1,6 +1,6 @@
 /**
  * ARCHIVO: js/auth.js
- * DESCRIPCIÓN: Maneja el login, registro y la navegación del formulario (Pasos y Atrás).
+ * DESCRIPCIÓN: Maneja login, registro y validaciones. (VERSIÓN COMPLETA)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función auxiliar para actualizar visuales de progreso
     const updateProgress = (toStep2) => {
         if (toStep2) {
-            // Avanzar al Paso 2
             if(progressBar) progressBar.style.width = '100%';
             if(step2Indicator) {
                 step2Indicator.classList.remove('bg-card', 'text-gray-500', 'border-border');
@@ -26,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if(backText) backText.innerText = "Back to step 1";
         } else {
-            // Volver al Paso 1
             if(progressBar) progressBar.style.width = '0%';
             if(step2Indicator) {
                 step2Indicator.classList.remove('bg-primary', 'text-white', 'border-primary');
@@ -37,27 +35,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 1. LÓGICA DEL BOTÓN ATRÁS (CORREGIDO)
+    // 1. LÓGICA DEL BOTÓN ATRÁS
     // ==========================================
     if (btnBack) {
         btnBack.addEventListener('click', (e) => {
             e.preventDefault();
-
-            // CASO A: Estamos en el Paso 2 -> Volver al Paso 1
             if (step1 && step1.classList.contains('hidden')) {
                 step2.classList.add('hidden');
                 step1.classList.remove('hidden');
-                updateProgress(false); // Resetear visuales
-            } 
-            // CASO B: Estamos en el Paso 1 -> Ir al Login
-            else {
+                updateProgress(false); 
+            } else {
                 window.location.href = 'login.html';
             }
         });
     }
 
     // ==========================================
-    // 2. LÓGICA DE INICIO DE SESIÓN (LOGIN)
+    // 2. LÓGICA DE INICIO DE SESIÓN (LOGIN EMAIL/PASS)
     // ==========================================
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
@@ -66,7 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            
             const errorMsg = document.getElementById('error-msg');
+            const errorText = document.getElementById('error-text');
             
             const user = DB.login(email, password);
 
@@ -75,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (user.role === 'owner') window.location.href = 'owner-dash.html';
                 else window.location.href = 'search.html';
             } else {
+                // Validación para cuando falla el inicio de sesión
+                if(errorText) errorText.innerText = "Invalid credentials. Account not found.";
                 if(errorMsg) errorMsg.classList.remove('hidden');
             }
         });
@@ -92,11 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const roleLabel = document.getElementById('role-label');
         const roleIcon = document.getElementById('role-icon');
 
-        // A. Manejo de Botones de Rol (Cliente vs Dueño)
         const goToStep2 = (role) => {
             selectedRoleInput.value = role;
             
-            // Configurar UI según rol
             if (role === 'owner') {
                 if(roleLabel) roleLabel.innerText = "Property Owner";
                 if(roleIcon) roleIcon.setAttribute('data-lucide', 'building-2');
@@ -105,24 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(roleIcon) roleIcon.setAttribute('data-lucide', 'car');
             }
 
-            // Refrescar íconos
             if(window.lucide) lucide.createIcons();
-
-            // Cambiar vista y actualizar progreso
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
             updateProgress(true);
         };
 
-        if (btnRoleClient) {
-            btnRoleClient.addEventListener('click', () => goToStep2('client'));
-        }
+        if (btnRoleClient) btnRoleClient.addEventListener('click', () => goToStep2('client'));
+        if (btnRoleOwner) btnRoleOwner.addEventListener('click', () => goToStep2('owner'));
 
-        if (btnRoleOwner) {
-            btnRoleOwner.addEventListener('click', () => goToStep2('owner'));
-        }
-
-        // B. Envío del Formulario de Registro
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -139,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 email: document.getElementById('reg-email').value.trim(),
                 password: password,
                 role: selectedRoleInput.value || 'client',
-                // Certificate will be handled in owner-dash
                 certificate: null
             };
 
@@ -147,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (success) {
                 alert("Account created successfully! Welcome to Parkly.");
-                
                 if (newUser.role === 'owner') {
                     localStorage.setItem('parkly_new_user', 'true');
                     window.location.href = 'owner-dash.html';
@@ -156,6 +141,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 alert("Error: User already exists with that email.");
+            }
+        });
+    }
+
+    // ==========================================
+    // 4. CONEXIÓN DEL BOTÓN DE GOOGLE
+    // ==========================================
+    const btnGoogleLogin = document.getElementById('btn-google-login');
+    
+    if (btnGoogleLogin) {
+        btnGoogleLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Llama a la función de Firebase que está en google-auth.js
+            if (typeof window.handleGoogleLogin === 'function') {
+                window.handleGoogleLogin();
+            } else {
+                console.error("Google logic is missing! Revisa que google-auth.js esté cargado.");
             }
         });
     }
