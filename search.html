@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Parking - PARKLY</title>
+    <title>Find Parking — PARKLY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind-config.js"></script>
     <link rel="stylesheet" href="css/styles.css">
@@ -12,96 +12,242 @@
     
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('parkly_theme') || 'dark';
-            document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+            const t = localStorage.getItem('parkly_theme');
+            if (t === 'light') document.documentElement.classList.remove('dark');
         })();
     </script>
-</head>
-<body class="bg-background text-foreground min-h-screen font-sans antialiased transition-colors duration-300">
 
+</head>
+<body class="bg-background text-foreground min-h-screen font-sans antialiased">
+
+    <!-- ── NAVBAR ── -->
     <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
         <nav class="max-w-7xl mx-auto flex justify-between items-center" aria-label="Main Navigation">
-            <a href="index.html" class="flex items-center gap-2 font-bold text-xl text-white group">
+            <a href="search.html" class="flex items-center gap-2 font-bold text-xl text-white group">
                 <i data-lucide="circle-parking" class="text-primary group-hover:rotate-12 transition-transform"></i>
                 <span class="tracking-tighter uppercase italic">PARK<span class="text-primary">LY</span></span>
             </a>
-            
-            <div class="flex-1 max-w-xl mx-8 flex gap-2">
+
+            <search class="flex flex-1 max-w-lg mx-8">
+                <label for="search-input" class="sr-only">Search parking spots</label>
                 <div class="relative flex-1">
-                    <label for="nav-search-input" class="sr-only">Search</label>
-                    <i data-lucide="search" class="absolute left-3 top-2.5 h-4 w-4 text-slate-500"></i>
-                    <input 
-                        type="search" 
-                        id="nav-search-input" 
-                        placeholder="Search by name or location..." 
-                        class="w-full bg-card border border-border rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:border-primary focus:outline-none transition-all"
-                    >
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" aria-hidden="true"></i>
+                    <input
+                        id="search-input"
+                        type="search"
+                        name="q"
+                        placeholder="Search by name, address or zone..."
+                        autocomplete="off"
+                        class="w-full bg-card border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary/60 transition-colors">
                 </div>
-                <button id="btn-execute-search" class="bg-primary text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:bg-blue-600 transition-all">
-                    <i data-lucide="search" class="h-4 w-4"></i> Search
+            </search>
+
+            <div class="flex items-center gap-3 shrink-0">
+                <a href="admin-dash.html" class="text-xs text-slate-400 hover:text-white transition-colors">Panel Admin</a>
+                <button id="theme-toggle" aria-label="Toggle dark/light mode"
+                    class="p-2 rounded-lg border border-border hover:border-primary/50 transition-colors">
+                    <i data-lucide="moon" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
                 </button>
-            </div>
-
-            <div class="flex items-center gap-6">
-                <a href="admin-dash.html" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Panel Admin</a>
-                
-                <div class="flex items-center gap-2 border border-border rounded-full px-3 py-1 bg-[#1e293b]">
-                    <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-                    <span class="text-xs font-bold text-white uppercase tracking-tighter">Admin <span class="text-[10px] bg-blue-900/50 text-blue-300 px-1 rounded ml-1">Admin</span></span>
-                </div>
-
-                <div class="flex items-center gap-3 border-l border-border pl-4">
-                    <button id="btn-logout" class="text-gray-500 hover:text-red-500 transition-all"><i data-lucide="log-out" class="h-5 w-5"></i></button>
-                    <button id="theme-toggle" class="text-gray-500 hover:text-yellow-400 transition-all"></button>
+                <div class="flex items-center gap-2 border border-border rounded-full px-3 py-1 bg-[#1e293b]"
+                     role="status" aria-label="Logged in user">
+                    <span id="nav-username" class="text-xs font-bold text-white">Guest</span>
+                    <span id="nav-role" class="text-[10px] bg-blue-900/50 text-blue-300 px-1.5 rounded font-black uppercase">Driver</span>
                 </div>
             </div>
+
         </nav>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-10">
-        <header class="mb-10">
-            <h1 class="text-4xl font-extrabold text-white mb-3 tracking-tight">Find your <span class="text-primary">perfect spot</span></h1>
-            <p class="text-slate-400 text-lg">Reserve verified, secure, and illuminated spaces in Bogotá and Medellín.</p>
-        </header>
+    <!-- ── MAIN ── -->
+    <main class="max-w-[1400px] mx-auto flex gap-0 px-6 py-8">
 
-        <section id="filters" class="mb-10" aria-label="Search filters">
-            <div id="filter-bar" class="flex flex-wrap items-center gap-2.5">
-                <button data-filter="all" class="filter-chip active flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider transition-all">
-                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> Filters
+        <!-- ── SIDEBAR FILTROS ── -->
+        <aside aria-label="Search filters" class="w-64 shrink-0 mr-8">
+            <div class="sticky top-24 bg-card border border-border rounded-2xl p-5 flex flex-col gap-5">
+
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-black text-white flex items-center gap-2">
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4 text-primary" aria-hidden="true"></i>
+                        Filters
+                        <span id="filter-count" role="status" aria-live="polite" aria-label="Active filters"
+                            class="hidden bg-primary text-white text-[10px] font-black w-5 h-5 rounded-full items-center justify-center">0</span>
+                    </h2>
+                    <button id="clear-all-btn" aria-label="Clear all filters"
+                        class="hidden text-[11px] font-black text-red-400 hover:text-red-300 transition-colors">
+                        Clear all
+                    </button>
+                </div>
+
+                <hr class="border-border" role="separator">
+
+                <!-- Sort -->
+                <fieldset>
+                    <legend class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Sort by</legend>
+                    <div class="flex flex-col gap-0.5" role="radiogroup" aria-label="Sort options">
+                        <button role="radio" aria-checked="true" data-sort="name"
+                            class="sort-opt active text-left">
+                            <i data-lucide="arrow-up-a-z" class="w-3 h-3 inline mr-1.5" aria-hidden="true"></i> Alphabetical
+                        </button>
+                        <button role="radio" aria-checked="false" data-sort="price"
+                            class="sort-opt text-left">
+                            <i data-lucide="trending-up" class="w-3 h-3 inline mr-1.5" aria-hidden="true"></i> Lowest Price
+                        </button>
+                        <button role="radio" aria-checked="false" data-sort="rating"
+                            class="sort-opt text-left">
+                            <i data-lucide="star" class="w-3 h-3 inline mr-1.5" aria-hidden="true"></i> Top Rated
+                        </button>
+                    </div>
+                </fieldset>
+
+                <hr class="border-border" role="separator">
+
+                <!-- Zone -->
+                <div>
+                    <label for="zone-filter" class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Zone</label>
+                    <select id="zone-filter"
+                        class="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/60 transition-colors cursor-pointer">
+                        <option value="">All zones</option>
+                    </select>
+                </div>
+
+                <hr class="border-border" role="separator">
+
+                <!-- Price slider -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <label for="price-slider" class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            Max price / hr
+                        </label>
+                        <output for="price-slider" id="price-label" class="text-[11px] font-black text-primary">Any</output>
+                    </div>
+                    <input
+                        type="range"
+                        id="price-slider"
+                        name="price-max"
+                        min="1000" max="20000" step="500" value="20000"
+                        aria-valuemin="1000" aria-valuemax="20000" aria-valuenow="20000"
+                        aria-valuetext="Any"
+                        class="w-full accent-blue-500 cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-slate-600 mt-1" aria-hidden="true">
+                        <span>$1.000</span><span>$20.000</span>
+                    </div>
+                </div>
+
+                <hr class="border-border" role="separator">
+
+                <!-- Feature toggles -->
+                <fieldset>
+                    <legend class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Features</legend>
+                    <div class="flex flex-col gap-3.5">
+
+                        <label class="flex items-center justify-between cursor-pointer select-none">
+                            <span class="text-sm text-slate-300 flex items-center gap-2">
+                                <i data-lucide="shield-check" class="w-4 h-4 text-slate-500" aria-hidden="true"></i>
+                                Verified only
+                            </span>
+                            <div class="toggle-track" id="toggle-verified" data-toggle="verified"
+                                role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer select-none">
+                            <span class="text-sm text-slate-300 flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-slate-500" aria-hidden="true"></i>
+                                Available now
+                            </span>
+                            <div class="toggle-track" id="toggle-available" data-toggle="available"
+                                role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer select-none">
+                            <span class="text-sm text-slate-300 flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-slate-500" aria-hidden="true"></i>
+                                Open 24h
+                            </span>
+                            <div class="toggle-track" id="toggle-is24h" data-toggle="is24h"
+                                role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer select-none">
+                            <span class="text-sm text-slate-300 flex items-center gap-2">
+                                <i data-lucide="zap" class="w-4 h-4 text-slate-500" aria-hidden="true"></i>
+                                EV Charging
+                            </span>
+                            <div class="toggle-track" id="toggle-evCharging" data-toggle="evCharging"
+                                role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer select-none">
+                            <span class="text-sm text-slate-300 flex items-center gap-2">
+                                <i data-lucide="lock" class="w-4 h-4 text-slate-500" aria-hidden="true"></i>
+                                Security
+                            </span>
+                            <div class="toggle-track" id="toggle-hasSecurity" data-toggle="hasSecurity"
+                                role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer select-none">
+                            <span class="text-sm text-slate-300 flex items-center gap-2">
+                                <i data-lucide="sun" class="w-4 h-4 text-slate-500" aria-hidden="true"></i>
+                                Illuminated
+                            </span>
+                            <div class="toggle-track" id="toggle-isIlluminated" data-toggle="isIlluminated"
+                                role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </label>
+
+                    </div>
+                </fieldset>
+
+                <hr class="border-border" role="separator">
+
+                <button id="reset-btn" aria-label="Clear all filters"
+                    class="w-full py-2.5 rounded-xl border border-border text-slate-400 text-[11px] font-black uppercase hover:border-red-500/50 hover:text-red-400 transition-all">
+                    Clear all filters
                 </button>
-                <button data-filter="verified" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Verified
-                </button>
-                <button data-filter="is24h" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
-                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 24 Hours
-                </button>
-                <button data-filter="evCharging" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
-                    <i data-lucide="zap" class="w-3.5 h-3.5"></i> EV Charging
-                </button>
-                <button data-filter="hasSecurity" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
-                    <i data-lucide="lock" class="w-3.5 h-3.5"></i> Security
-                </button>
-                <button data-filter="isIlluminated" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
-                    <i data-lucide="sun" class="w-3.5 h-3.5"></i> Illuminated
-                </button>
-                <button data-filter="available" class="filter-chip flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-slate-400 text-[11px] font-bold uppercase hover:border-primary/50">
-                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Available
-                </button>
-                <button id="btn-clear-filters" class="text-[11px] font-black text-red-500 uppercase tracking-widest ml-4 hover:underline">Clear all</button>
+
             </div>
-        </section>
+        </aside>
 
-        <section class="mb-8">
-            <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                <span id="spot-count">0</span> parking spots found
-            </h2>
-        </section>
+        <!-- ── RESULTS ── -->
+        <section class="flex-1 min-w-0" aria-label="Parking spots results">
 
-        <section id="spots-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></section>
+            <header class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-extrabold text-white">
+                    Find your <span class="text-primary">perfect spot</span>
+                </h1>
+                <p class="text-[11px] font-black text-slate-500 uppercase" role="status" aria-live="polite">
+                    <span id="spot-count">0</span> spots found
+                </p>
+            </header>
 
-        <section id="empty-state" class="hidden py-32 text-center animate-fade-in" aria-live="polite">
-            <i data-lucide="map-pin-off" class="mx-auto h-16 w-16 text-slate-800 mb-6"></i>
-            <h3 class="text-xl font-bold text-slate-500">No spots found matching your filters</h3>
+            <!-- Cards grid -->
+            <ol id="spots-grid"
+                class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 list-none p-0 m-0"
+                aria-label="Parking spots list">
+            </ol>
+
+            <!-- Empty state -->
+            <div id="empty-state" role="status" aria-live="polite" class="hidden py-32 text-center">
+                <i data-lucide="map-pin-off" class="mx-auto h-16 w-16 text-slate-800 mb-6" aria-hidden="true"></i>
+                <p class="text-xl font-bold text-slate-500">No spots match your filters</p>
+                <p class="text-slate-600 mt-2 text-sm">Try adjusting the filters on the left</p>
+                <button id="empty-reset-btn"
+                    class="mt-6 px-6 py-2.5 bg-primary/10 border border-primary/30 text-primary text-sm font-bold rounded-xl hover:bg-primary/20 transition-all">
+                    Clear all filters
+                </button>
+            </div>
+
         </section>
 
 
@@ -139,7 +285,7 @@
     <!-- Mensajes -->
     <div id="chatbox-messages">
         <div class="chat-bubble bot">
-            👋 Hey! I'm the <strong>PARKLY assistant</strong>. How can I help you today?
+             Hey! I'm the <strong>PARKLY assistant</strong>. How can I help you today?
         </div>
         <div class="quick-replies">
             <button class="quick-reply-btn" data-msg="Find available spots">🅿️ Find spots</button>
@@ -167,14 +313,56 @@
 
     </main>
 
-    <footer class="border-t border-border bg-[#020617] py-8 text-center text-xs text-slate-500 uppercase tracking-widest">
-        <p>PARKLY &copy; 2026. All rights reserved.</p>
-    </footer>
+    <!-- ── TEMPLATE: SPOT CARD ── -->
+    <template id="spot-card-tpl">
+        <li>
+            <article class="bg-card border border-border rounded-2xl overflow-hidden group hover:border-primary/40 transition-all cursor-pointer shadow-lg shadow-black/20">
+                <div class="relative h-52 overflow-hidden">
+                    <img data-field="image" alt=""
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute top-3 left-3 flex gap-2">
+                        <span data-field="badge-verified"
+                            class="hidden bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg items-center gap-1 shadow-lg">
+                            <i data-lucide="shield-check" class="w-3 h-3" aria-hidden="true"></i> Verified
+                        </span>
+                        <span data-field="badge-status"
+                            class="text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg flex items-center gap-1">
+                            <i data-field="badge-icon" class="w-3 h-3" aria-hidden="true"></i>
+                            <span data-field="badge-label"></span>
+                        </span>
+                    </div>
+                    <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl text-white font-bold text-sm">
+                        $ <span data-field="price"></span>
+                        <span class="text-[10px] text-slate-400 font-normal">/hr</span>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 data-field="name" class="font-bold text-white text-lg leading-tight"></h3>
+                        <div class="flex items-center gap-1 text-yellow-500 font-bold text-sm shrink-0 ml-2">
+                            <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
+                            <span data-field="rating"></span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400 flex items-center gap-1.5 mb-5">
+                        <i data-lucide="map-pin" class="w-4 h-4 shrink-0" aria-hidden="true"></i>
+                        <span data-field="address" class="truncate"></span>
+                    </p>
+                    <footer class="flex items-center gap-4 text-slate-600 border-t border-border pt-4">
+                        <i data-lucide="sun"    data-feat="isIlluminated" class="w-4 h-4" title="Illuminated" aria-hidden="true"></i>
+                        <i data-lucide="shield" data-feat="hasSecurity"  class="w-4 h-4" title="Security"    aria-hidden="true"></i>
+                        <i data-lucide="zap"    data-feat="evCharging"   class="w-4 h-4" title="EV Charging" aria-hidden="true"></i>
+                        <i data-lucide="clock"  data-feat="is24h"        class="w-4 h-4" title="Open 24h"    aria-hidden="true"></i>
+                        <span data-field="zone" class="ml-auto text-[10px] font-black text-slate-600 uppercase tracking-wide"></span>
+                    </footer>
+                </div>
+            </article>
+        </li>
+    </template>
 
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script src="js/search.js"></script>
-    <script>lucide.createIcons();</script>
     <script src="IA/chatbox.js"></script>
 </body>
 </html>

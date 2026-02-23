@@ -34,6 +34,29 @@ window.handleGoogleLogin = async function() {
         // B. Handle User Data & Role
         let users = JSON.parse(localStorage.getItem('parkly_users')) || [];
         let existingUser = users.find(u => u.email === googleUser.email);
+        
+        // ==========================================================
+        // VALIDACIÓN DE SEGURIDAD (Si está en Login y NO existe)
+        // ==========================================================
+        const isLoginPage = document.getElementById('login-form') !== null;
+
+        if (isLoginPage && !existingUser) {
+            console.warn("Access denied: Google account not registered.");
+            
+            const errorMsg = document.getElementById('error-msg');
+            const errorText = document.getElementById('error-text');
+            
+            if (errorMsg && errorText) {
+                errorText.innerText = "Google account not registered. Please sign up first.";
+                errorMsg.classList.remove('hidden');
+            } else {
+                alert("Google account not registered. Please sign up first.");
+            }
+            
+            return; // DETIENE EL PROCESO, NO LO DEJA ENTRAR
+        }
+        // ==========================================================
+
         let userToSave;
 
         if (existingUser) {
