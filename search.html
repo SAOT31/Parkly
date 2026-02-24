@@ -9,22 +9,22 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="IA/chatbox.css">
-    
+
     <script>
         (function() {
             const t = localStorage.getItem('parkly_theme');
             if (t === 'light') document.documentElement.classList.remove('dark');
         })();
     </script>
-
 </head>
 <body class="bg-background text-foreground min-h-screen font-sans antialiased">
 
     <!-- ── NAVBAR ── -->
     <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
         <nav class="max-w-7xl mx-auto flex justify-between items-center" aria-label="Main Navigation">
+
             <a href="search.html" class="flex items-center gap-2 font-bold text-xl text-white group">
-                <i data-lucide="circle-parking" class="text-primary group-hover:rotate-12 transition-transform"></i>
+                <i data-lucide="circle-parking" class="text-primary group-hover:rotate-12 transition-transform" aria-hidden="true"></i>
                 <span class="tracking-tighter uppercase italic">PARK<span class="text-primary">LY</span></span>
             </a>
 
@@ -84,16 +84,13 @@
                 <fieldset>
                     <legend class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Sort by</legend>
                     <div class="flex flex-col gap-0.5" role="radiogroup" aria-label="Sort options">
-                        <button role="radio" aria-checked="true" data-sort="name"
-                            class="sort-opt active text-left">
+                        <button role="radio" aria-checked="true" data-sort="name" class="sort-opt active text-left">
                             <i data-lucide="arrow-up-a-z" class="w-3 h-3 inline mr-1.5" aria-hidden="true"></i> Alphabetical
                         </button>
-                        <button role="radio" aria-checked="false" data-sort="price"
-                            class="sort-opt text-left">
+                        <button role="radio" aria-checked="false" data-sort="price" class="sort-opt text-left">
                             <i data-lucide="trending-up" class="w-3 h-3 inline mr-1.5" aria-hidden="true"></i> Lowest Price
                         </button>
-                        <button role="radio" aria-checked="false" data-sort="rating"
-                            class="sort-opt text-left">
+                        <button role="radio" aria-checked="false" data-sort="rating" class="sort-opt text-left">
                             <i data-lucide="star" class="w-3 h-3 inline mr-1.5" aria-hidden="true"></i> Top Rated
                         </button>
                     </div>
@@ -250,131 +247,142 @@
 
         </section>
 
-
-!-- Botón flotante -->
-<button id="chatbox-toggle" aria-label="Abrir chat de soporte">
-    <span class="notif-dot"></span>
-    <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-    <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-</button>
-
-<!-- Panel de chat -->
-<div id="chatbox-panel" role="dialog" aria-modal="true" aria-label="Chat de soporte PARKLY">
-
-    <!-- Header -->
-    <div class="chat-header">
-        <div class="chat-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2C8 2 5 5 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-4-3-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.5"/>
-            </svg>
-        </div>
-        <div class="chat-header-info">
-            <h3>PARK<span>LY</span> Support</h3>
-            <p class="status-line"><span class="status-dot"></span>Online — responding instantly</p>
-        </div>
-        <!-- Indicador de modo -->
-        <div class="mode-badge" id="mode-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            <span>Quick Replies</span>
-        </div>
-    </div>
-
-    <!-- Mensajes -->
-    <div id="chatbox-messages">
-        <!-- Bienvenida -->
-        <div class="chat-bubble bot welcome-bubble">
-            👋 Hey! I'm the <strong>PARKLY assistant</strong>.<br>
-            How can I help you today?
-        </div>
-
-        <!-- Opciones rápidas -->
-        <div class="quick-options" id="quick-options">
-            <p class="quick-options-label">Choose a topic:</p>
-
-            <button class="quick-btn" data-topic="find">
-                <span class="quick-icon">🔍</span>
-                <div>
-                    <strong>Find a parking spot</strong>
-                    <small>Search available spaces near you</small>
-                </div>
-            </button>
-
-            <button class="quick-btn" data-topic="reserve">
-                <span class="quick-icon">📅</span>
-                <div>
-                    <strong>Make a reservation</strong>
-                    <small>Book a spot in advance</small>
-                </div>
-            </button>
-
-            <button class="quick-btn" data-topic="payment">
-                <span class="quick-icon">💳</span>
-                <div>
-                    <strong>Payment & billing</strong>
-                    <small>Methods, invoices, refunds</small>
-                </div>
-            </button>
-
-            <button class="quick-btn" data-topic="cancel">
-                <span class="quick-icon">🔄</span>
-                <div>
-                    <strong>Cancel a reservation</strong>
-                    <small>Modify or cancel your booking</small>
-                </div>
-            </button>
-
-            <button class="quick-btn" data-topic="account">
-                <span class="quick-icon">👤</span>
-                <div>
-                    <strong>Account & access</strong>
-                    <small>Login issues, settings</small>
-                </div>
-            </button>
-
-            <!-- Opción de conectar con IA -->
-            <button class="quick-btn ai-btn" data-topic="ai">
-                <span class="quick-icon ai-glow">✨</span>
-                <div>
-                    <strong>Ask AI assistant</strong>
-                    <small>Chat freely with our AI</small>
-                </div>
-                <span class="ai-chip">AI</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Input (oculto en modo quick replies) -->
-    <div class="chat-input-area" id="chat-input-area" style="display:none;">
-        <button class="back-btn" id="back-btn" title="Volver al menú">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"/>
-            </svg>
-        </button>
-        <textarea id="chatbox-input" rows="1" placeholder="Type a message..."></textarea>
-        <button id="chatbox-send" aria-label="Send message">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-        </button>
-    </div>
-</div>
-
-        
-
     </main>
+
+    <!-- ── CHATBOX ── -->
+
+    <!-- Botón flotante -->
+    <button id="chatbox-toggle" aria-label="Abrir chat de soporte">
+        <span class="notif-dot"></span>
+        <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+
+    <!-- Panel de chat -->
+    <div id="chatbox-panel" role="dialog" aria-modal="true" aria-label="Chat de soporte PARKLY">
+
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="chat-avatar" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2C8 2 5 5 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-4-3-7-7-7z"/>
+                    <circle cx="12" cy="9" r="2.5"/>
+                </svg>
+            </div>
+            <div class="chat-header-info">
+                <h3>PARK<span>LY</span> Support</h3>
+                <p class="status-line"><span class="status-dot" aria-hidden="true"></span>Online — responding instantly</p>
+            </div>
+            <div class="mode-badge" id="mode-badge" aria-live="polite">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"
+                     fill="currentColor" aria-hidden="true">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span>Quick Replies</span>
+            </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div id="chatbox-messages" role="log" aria-live="polite" aria-label="Chat messages">
+
+            <div class="chat-bubble bot welcome-bubble">
+                👋 Hey! I'm the <strong>PARKLY assistant</strong>.<br>
+                How can I help you today?
+            </div>
+
+            <div class="quick-options" id="quick-options">
+                <p class="quick-options-label">Choose a topic:</p>
+
+                <button class="quick-btn" data-topic="find">
+                    <span class="quick-icon" aria-hidden="true">🔍</span>
+                    <div>
+                        <strong>Find a parking spot</strong>
+                        <small>Search available spaces near you</small>
+                    </div>
+                </button>
+
+                <button class="quick-btn" data-topic="reserve">
+                    <span class="quick-icon" aria-hidden="true">📅</span>
+                    <div>
+                        <strong>Make a reservation</strong>
+                        <small>Book a spot in advance</small>
+                    </div>
+                </button>
+
+                <button class="quick-btn" data-topic="payment">
+                    <span class="quick-icon" aria-hidden="true">💳</span>
+                    <div>
+                        <strong>Payment & billing</strong>
+                        <small>Methods, invoices, refunds</small>
+                    </div>
+                </button>
+
+                <button class="quick-btn" data-topic="cancel">
+                    <span class="quick-icon" aria-hidden="true">🔄</span>
+                    <div>
+                        <strong>Cancel a reservation</strong>
+                        <small>Modify or cancel your booking</small>
+                    </div>
+                </button>
+
+                <button class="quick-btn" data-topic="account">
+                    <span class="quick-icon" aria-hidden="true">👤</span>
+                    <div>
+                        <strong>Account & access</strong>
+                        <small>Login issues, settings</small>
+                    </div>
+                </button>
+
+                <button class="quick-btn ai-btn" data-topic="ai">
+                    <span class="quick-icon ai-glow" aria-hidden="true">✨</span>
+                    <div>
+                        <strong>Ask AI assistant</strong>
+                        <small>Chat freely with our AI</small>
+                    </div>
+                    <span class="ai-chip">AI</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area" id="chat-input-area" style="display:none;">
+            <button class="back-btn" id="back-btn" title="Back to menu" aria-label="Back to menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <textarea
+                id="chatbox-input"
+                rows="1"
+                placeholder="Type a message..."
+                aria-label="Type your message"
+                autocomplete="off"
+                spellcheck="true"
+                maxlength="500">
+            </textarea>
+            <button id="chatbox-send" aria-label="Send message">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+
+    </div>
+    <!-- ── FIN CHATBOX ── -->
 
     <!-- ── TEMPLATE: SPOT CARD ── -->
     <template id="spot-card-tpl">
@@ -382,7 +390,8 @@
             <article class="bg-card border border-border rounded-2xl overflow-hidden group hover:border-primary/40 transition-all cursor-pointer shadow-lg shadow-black/20">
                 <div class="relative h-52 overflow-hidden">
                     <img data-field="image" alt=""
-                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy">
                     <div class="absolute top-3 left-3 flex gap-2">
                         <span data-field="badge-verified"
                             class="hidden bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg items-center gap-1 shadow-lg">
@@ -402,7 +411,8 @@
                 <div class="p-5">
                     <div class="flex justify-between items-start mb-1">
                         <h3 data-field="name" class="font-bold text-white text-lg leading-tight"></h3>
-                        <div class="flex items-center gap-1 text-yellow-500 font-bold text-sm shrink-0 ml-2">
+                        <div class="flex items-center gap-1 text-yellow-500 font-bold text-sm shrink-0 ml-2"
+                             aria-label="Rating">
                             <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
                             <span data-field="rating"></span>
                         </div>
@@ -412,10 +422,10 @@
                         <span data-field="address" class="truncate"></span>
                     </p>
                     <footer class="flex items-center gap-4 text-slate-600 border-t border-border pt-4">
-                        <i data-lucide="sun"    data-feat="isIlluminated" class="w-4 h-4" title="Illuminated" aria-hidden="true"></i>
-                        <i data-lucide="shield" data-feat="hasSecurity"  class="w-4 h-4" title="Security"    aria-hidden="true"></i>
-                        <i data-lucide="zap"    data-feat="evCharging"   class="w-4 h-4" title="EV Charging" aria-hidden="true"></i>
-                        <i data-lucide="clock"  data-feat="is24h"        class="w-4 h-4" title="Open 24h"    aria-hidden="true"></i>
+                        <i data-lucide="sun"    data-feat="isIlluminated" class="w-4 h-4" title="Illuminated"  aria-label="Illuminated"></i>
+                        <i data-lucide="shield" data-feat="hasSecurity"   class="w-4 h-4" title="Security"     aria-label="Security"></i>
+                        <i data-lucide="zap"    data-feat="evCharging"    class="w-4 h-4" title="EV Charging"  aria-label="EV Charging"></i>
+                        <i data-lucide="clock"  data-feat="is24h"         class="w-4 h-4" title="Open 24h"     aria-label="Open 24 hours"></i>
                         <span data-field="zone" class="ml-auto text-[10px] font-black text-slate-600 uppercase tracking-wide"></span>
                     </footer>
                 </div>
@@ -423,9 +433,11 @@
         </li>
     </template>
 
+    <!-- Scripts al final del body para mejor performance -->
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script src="js/search.js"></script>
-    <script  src="IA/chatbox.js"></script>
+    <script src="IA/chatbox.js"></script>
+
 </body>
 </html>
