@@ -363,3 +363,198 @@
         bottom: 16px;
     }
 }
+
+/* =========================================
+   PARKLY — Chatbox CSS additions
+   (Agregar a tu CSS existente)
+   ========================================= */
+
+/* ── Quick Options ── */
+.quick-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 2px 8px;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.quick-options-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin: 4px 0 2px;
+}
+
+.quick-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+    color: inherit;
+}
+
+.quick-btn:hover {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+    transform: translateX(3px);
+}
+
+.quick-btn strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+    line-height: 1.3;
+}
+
+.quick-btn small {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 1px;
+}
+
+.quick-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+}
+
+/* ── AI Button especial ── */
+.ai-btn {
+    background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.12)) !important;
+    border-color: rgba(139,92,246,0.3) !important;
+    position: relative;
+}
+
+.ai-btn:hover {
+    background: linear-gradient(135deg, rgba(59,130,246,0.22), rgba(139,92,246,0.22)) !important;
+    border-color: rgba(139,92,246,0.6) !important;
+    transform: translateX(3px);
+}
+
+.ai-chip {
+    margin-left: auto;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.ai-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(139,92,246,0.6)); }
+    50%       { filter: drop-shadow(0 0 8px rgba(139,92,246,0.9)); }
+}
+
+/* ── Mode Badge (header) ── */
+.mode-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #94a3b8;
+    letter-spacing: 0.04em;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.mode-badge.ai-active {
+    background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+    border-color: rgba(139,92,246,0.4);
+    color: #a78bfa;
+}
+
+/* ── Botón volver ── */
+.back-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: #94a3b8;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: #e2e8f0;
+}
+
+/* ── Input area transición ── */
+.chat-input-area {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateY(6px);
+}
+
+.chat-input-area.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Bubble de bienvenida ── */
+.welcome-bubble {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(15,23,42,0.6)) !important;
+    border: 1px solid rgba(59,130,246,0.2) !important;
+}
+
+/* ── Botón inline Ask AI ── */
+.inline-ai-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.inline-ai-btn:hover {
+    opacity: 0.85;
+    transform: scale(1.03);
+}
+
+/* ── Animación entrada burbuja ── */
+.bubble-in {
+    animation: bubbleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0)  scale(1); }
+}

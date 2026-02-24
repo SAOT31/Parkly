@@ -251,7 +251,7 @@
         </section>
 
 
-<!-- Botón flotante -->
+!-- Botón flotante -->
 <button id="chatbox-toggle" aria-label="Abrir chat de soporte">
     <span class="notif-dot"></span>
     <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -272,26 +272,95 @@
         <div class="chat-avatar">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 8v4l3 3"/>
+                <path d="M12 2C8 2 5 5 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-4-3-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5"/>
             </svg>
         </div>
         <div class="chat-header-info">
-            <h3>PARK<span style="color:#3b82f6">LY</span> Support</h3>
-            <p>Online — responding instantly</p>
+            <h3>PARK<span>LY</span> Support</h3>
+            <p class="status-line"><span class="status-dot"></span>Online — responding instantly</p>
+        </div>
+        <!-- Indicador de modo -->
+        <div class="mode-badge" id="mode-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>Quick Replies</span>
         </div>
     </div>
 
     <!-- Mensajes -->
     <div id="chatbox-messages">
-        <div class="chat-bubble bot">
-             Hey! I'm the <strong>PARKLY assistant</strong>. How can I help you today?
+        <!-- Bienvenida -->
+        <div class="chat-bubble bot welcome-bubble">
+            👋 Hey! I'm the <strong>PARKLY assistant</strong>.<br>
+            How can I help you today?
         </div>
-       
+
+        <!-- Opciones rápidas -->
+        <div class="quick-options" id="quick-options">
+            <p class="quick-options-label">Choose a topic:</p>
+
+            <button class="quick-btn" data-topic="find">
+                <span class="quick-icon">🔍</span>
+                <div>
+                    <strong>Find a parking spot</strong>
+                    <small>Search available spaces near you</small>
+                </div>
+            </button>
+
+            <button class="quick-btn" data-topic="reserve">
+                <span class="quick-icon">📅</span>
+                <div>
+                    <strong>Make a reservation</strong>
+                    <small>Book a spot in advance</small>
+                </div>
+            </button>
+
+            <button class="quick-btn" data-topic="payment">
+                <span class="quick-icon">💳</span>
+                <div>
+                    <strong>Payment & billing</strong>
+                    <small>Methods, invoices, refunds</small>
+                </div>
+            </button>
+
+            <button class="quick-btn" data-topic="cancel">
+                <span class="quick-icon">🔄</span>
+                <div>
+                    <strong>Cancel a reservation</strong>
+                    <small>Modify or cancel your booking</small>
+                </div>
+            </button>
+
+            <button class="quick-btn" data-topic="account">
+                <span class="quick-icon">👤</span>
+                <div>
+                    <strong>Account & access</strong>
+                    <small>Login issues, settings</small>
+                </div>
+            </button>
+
+            <!-- Opción de conectar con IA -->
+            <button class="quick-btn ai-btn" data-topic="ai">
+                <span class="quick-icon ai-glow">✨</span>
+                <div>
+                    <strong>Ask AI assistant</strong>
+                    <small>Chat freely with our AI</small>
+                </div>
+                <span class="ai-chip">AI</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Input -->
-    <div class="chat-input-area">
+    <!-- Input (oculto en modo quick replies) -->
+    <div class="chat-input-area" id="chat-input-area" style="display:none;">
+        <button class="back-btn" id="back-btn" title="Volver al menú">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </button>
         <textarea id="chatbox-input" rows="1" placeholder="Type a message..."></textarea>
         <button id="chatbox-send" aria-label="Send message">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -302,7 +371,6 @@
         </button>
     </div>
 </div>
-
 
         
 
