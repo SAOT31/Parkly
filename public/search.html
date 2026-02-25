@@ -16,11 +16,9 @@
             if (t === 'light') document.documentElement.classList.remove('dark');
         })();
     </script>
-
 </head>
 <body class="bg-background text-foreground min-h-screen font-sans antialiased">
 
-    <!-- ── NAVBAR ── -->
     <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
         <nav class="max-w-7xl mx-auto flex justify-between items-center" aria-label="Main Navigation">
             <a href="search.html" class="flex items-center gap-2 font-bold text-xl text-white group">
@@ -44,24 +42,28 @@
 
             <div class="flex items-center gap-3 shrink-0">
                 <a href="admin-dash.html" class="text-xs text-slate-400 hover:text-white transition-colors">Panel Admin</a>
+                
                 <button id="theme-toggle" aria-label="Toggle dark/light mode"
                     class="p-2 rounded-lg border border-border hover:border-primary/50 transition-colors">
                     <i data-lucide="moon" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
                 </button>
+
+                <button id="logout-btn" aria-label="Sign out"
+                    class="p-2 rounded-lg border border-border hover:border-red-500/50 text-slate-400 hover:text-red-400 transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4" aria-hidden="true"></i>
+                </button>
+
                 <div class="flex items-center gap-2 border border-border rounded-full px-3 py-1 bg-[#1e293b]"
                      role="status" aria-label="Logged in user">
                     <span id="nav-username" class="text-xs font-bold text-white">Guest</span>
                     <span id="nav-role" class="text-[10px] bg-blue-900/50 text-blue-300 px-1.5 rounded font-black uppercase">Driver</span>
                 </div>
             </div>
-
         </nav>
     </header>
 
-    <!-- ── MAIN ── -->
     <main class="max-w-[1400px] mx-auto flex gap-0 px-6 py-8">
 
-        <!-- ── SIDEBAR FILTROS ── -->
         <aside aria-label="Search filters" class="w-64 shrink-0 mr-8">
             <div class="sticky top-24 bg-card border border-border rounded-2xl p-5 flex flex-col gap-5">
 
@@ -80,7 +82,6 @@
 
                 <hr class="border-border" role="separator">
 
-                <!-- Sort -->
                 <fieldset>
                     <legend class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Sort by</legend>
                     <div class="flex flex-col gap-0.5" role="radiogroup" aria-label="Sort options">
@@ -101,7 +102,6 @@
 
                 <hr class="border-border" role="separator">
 
-                <!-- Zone -->
                 <div>
                     <label for="zone-filter" class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Zone</label>
                     <select id="zone-filter"
@@ -112,7 +112,6 @@
 
                 <hr class="border-border" role="separator">
 
-                <!-- Price slider -->
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <label for="price-slider" class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -135,7 +134,6 @@
 
                 <hr class="border-border" role="separator">
 
-                <!-- Feature toggles -->
                 <fieldset>
                     <legend class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Features</legend>
                     <div class="flex flex-col gap-3.5">
@@ -219,7 +217,6 @@
             </div>
         </aside>
 
-        <!-- ── RESULTS ── -->
         <section class="flex-1 min-w-0" aria-label="Parking spots results">
 
             <header class="flex items-center justify-between mb-6">
@@ -231,13 +228,11 @@
                 </p>
             </header>
 
-            <!-- Cards grid -->
             <ol id="spots-grid"
                 class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 list-none p-0 m-0"
                 aria-label="Parking spots list">
             </ol>
 
-            <!-- Empty state -->
             <div id="empty-state" role="status" aria-live="polite" class="hidden py-32 text-center">
                 <i data-lucide="map-pin-off" class="mx-auto h-16 w-16 text-slate-800 mb-6" aria-hidden="true"></i>
                 <p class="text-xl font-bold text-slate-500">No spots match your filters</p>
@@ -250,65 +245,50 @@
 
         </section>
 
-
-<!-- Botón flotante -->
-<button id="chatbox-toggle" aria-label="Abrir chat de soporte">
-    <span class="notif-dot"></span>
-    <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-    <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-</button>
-
-<!-- Panel de chat -->
-<div id="chatbox-panel" role="dialog" aria-modal="true" aria-label="Chat de soporte PARKLY">
-
-    <!-- Header -->
-    <div class="chat-header">
-        <div class="chat-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+        <button id="chatbox-toggle" aria-label="Abrir chat de soporte">
+            <span class="notif-dot"></span>
+            <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 8v4l3 3"/>
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
-        </div>
-        <div class="chat-header-info">
-            <h3>PARK<span style="color:#3b82f6">LY</span> Support</h3>
-            <p>Online — responding instantly</p>
-        </div>
-    </div>
-
-    <!-- Mensajes -->
-    <div id="chatbox-messages">
-        <div class="chat-bubble bot">
-             Hey! I'm the <strong>PARKLY assistant</strong>. How can I help you today?
-        </div>
-       
-    </div>
-
-    <!-- Input -->
-    <div class="chat-input-area">
-        <textarea id="chatbox-input" rows="1" placeholder="Type a message..."></textarea>
-        <button id="chatbox-send" aria-label="Send message">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
         </button>
-    </div>
-</div>
 
-
-        
-
+        <div id="chatbox-panel" role="dialog" aria-modal="true" aria-label="Chat de soporte PARKLY">
+            <div class="chat-header">
+                <div class="chat-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 8v4l3 3"/>
+                    </svg>
+                </div>
+                <div class="chat-header-info">
+                    <h3>PARK<span style="color:#3b82f6">LY</span> Support</h3>
+                    <p>Online — responding instantly</p>
+                </div>
+            </div>
+            <div id="chatbox-messages">
+                <div class="chat-bubble bot">
+                     Hey! I'm the <strong>PARKLY assistant</strong>. How can I help you today?
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <textarea id="chatbox-input" rows="1" placeholder="Type a message..."></textarea>
+                <button id="chatbox-send" aria-label="Send message">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
     </main>
 
-    <!-- ── TEMPLATE: SPOT CARD ── -->
     <template id="spot-card-tpl">
         <li>
             <article class="bg-card border border-border rounded-2xl overflow-hidden group hover:border-primary/40 transition-all cursor-pointer shadow-lg shadow-black/20">
@@ -358,6 +338,6 @@
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script src="js/search.js"></script>
-    <script  src="IA/chatbox.js"></script>
+    <script src="IA/chatbox.js"></script>
 </body>
 </html>
