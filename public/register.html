@@ -8,12 +8,6 @@
     <script src="js/tailwind-config.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        (function() {
-            const theme = localStorage.getItem('parkly_theme') || 'dark';
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-        })();
-    </script>
 </head>
 <body class="flex items-center justify-center min-h-screen px-4 bg-background py-10 transition-colors duration-300">
 
@@ -119,7 +113,7 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="handleGoogleLogin()" class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-700 rounded-xl bg-[#1e293b] hover:bg-slate-800 hover:border-slate-500 transition-all text-white font-medium shadow-lg group">
+                <button type="button" id="btn-google-login" class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-700 rounded-xl bg-[#1e293b] hover:bg-slate-800 hover:border-slate-500 transition-all text-white font-medium shadow-lg group">
                     <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -134,6 +128,7 @@
     </main>
 
     <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/auth.js"></script>
     <script type="module" src="js/google-auth.js"></script>
     <script>lucide.createIcons();</script>

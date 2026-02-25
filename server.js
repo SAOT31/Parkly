@@ -1,135 +1,116 @@
-// FILE: server.js
-// Ejecutar con: node server.js
-
 import express from 'express';
 import mysql from 'mysql2/promise';
 import axios from 'axios';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// --- CONFIGURACION DE MIDDLEWARES ---
 app.use(express.json());
 app.use(cors());
 
-// ── CONFIGURACIÓN DE TU BASE DE DATOS EN LA NUBE (TiDB) ──
+// Servir archivos estaticos desde la carpeta public
+app.use(express.static('public')); 
+
 const dbConfig = {
-    host: 'gateway01.us-east-1.prod.aws.tidbcloud.com',
-    port: 4000,
-    user: '2JfVpYk98ujjzeJ.root',
-    password: 'EIzjGWrDD280LttB',
-    database: 'test',
-    ssl: {
-        rejectUnauthorized: true // Obligatorio para bases de datos en la nube
-    }
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 4000,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: { rejectUnauthorized: true }
 };
 
-// ── 1. LOGIN ──
+// --- 1. AUTHENTICATION (Table: users) ---
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
+    let connection;
     try {
-        const connection = await mysql.createConnection(dbConfig);
+        connection = await mysql.createConnection(dbConfig);
         const [rows] = await connection.execute(
             'SELECT id, name, email, role, phone FROM users WHERE email = ? AND password = ?',
             [email, password]
         );
-        await connection.end();
-
         if (rows.length > 0) {
-            res.json(rows[0]); 
+            res.json(rows[0]);
         } else {
             res.status(401).json({ error: "Invalid credentials" });
         }
     } catch (error) {
-        console.error("Error en DB:", error);
-        res.status(500).json({ error: "Database error" });
+        console.error("Error en Login:", error.message);
+        res.status(500).json({ error: "Database error", details: error.message });
+    } finally {
+        if (connection) await connection.end();
     }
 });
 
-// ── 2. REGISTRO ──
 app.post('/api/register', async (req, res) => {
     const { name, email, password, role, phone } = req.body;
+    let connection;
     try {
-        const connection = await mysql.createConnection(dbConfig);
+        connection = await mysql.createConnection(dbConfig);
         await connection.execute(
             'INSERT INTO users (name, email, password, role, phone) VALUES (?, ?, ?, ?, ?)',
             [name, email, password, role, phone]
         );
-        await connection.end();
-        res.status(201).json({ success: true });
+        res.status(201).json({ message: "User registered" });
     } catch (error) {
-        console.error("Error en DB:", error);
-        res.status(500).json({ error: "Database error or email exists" });
+        console.error("Error en Registro:", error.message);
+        res.status(500).json({ error: "Registration failed" });
+    } finally {
+        if (connection) await connection.end();
     }
 });
 
-// ── 3. LISTAR PARQUEADEROS ──
+// --- 2. PARKING SPOTS (Table: parking_spots) ---
 app.get('/api/spots', async (req, res) => {
+    let connection;
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute('SELECT * FROM parking_spots');
-        await connection.end();
+        connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT * FROM parking_spots WHERE status = "approved"');
         res.json(rows);
     } catch (error) {
-        res.status(500).json({ error: "Database error" });
+        res.status(500).json({ error: "Error loading spots" });
+    } finally {
+        if (connection) await connection.end();
     }
 });
 
-// ── 4. ANALÍTICA ADMIN (El puente con Python) ──
-app.get('/api/admin/metrics', async (req, res) => {
+// --- 3. RESERVATIONS (Table: reservations) ---
+app.post('/api/reservations', async (req, res) => {
+    const { id, spotId, userEmail, date, startTime, endTime, amount, status } = req.body;
+    let connection;
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        // 1. Cálculos rápidos directos desde MySQL
-        const [[{total_spots}]] = await connection.execute('SELECT COUNT(*) as total_spots FROM parking_spots');
-        const [[{total_res}]] = await connection.execute('SELECT COUNT(*) as total_res FROM reservations');
-        const [[{revenue}]] = await connection.execute('SELECT SUM(total_amount) as revenue FROM reservations WHERE status="completed"');
-        const [[{users}]] = await connection.execute('SELECT COUNT(*) as users FROM users');
-        await connection.end();
-
-        // 2. Pedimos los cálculos complejos al microservicio de Python (puerto 8000)
-        let pythonProjection = 0;
-        let pythonOccupancy = 0;
-        let peakDay = "N/A";
-
-        try {
-            const projRes = await axios.get('http://localhost:8000/stats/monthly-projection');
-            const occRes = await axios.get('http://localhost:8000/stats/occupancy-rate');
-            const dayRes = await axios.get('http://localhost:8000/stats/revenue-by-day');
-            
-            pythonProjection = projRes.data.projected_earnings;
-            pythonOccupancy = occRes.data.occupancy_percentage;
-            
-            if (dayRes.data && dayRes.data.length > 0) {
-                const topDay = dayRes.data.reduce((max, current) => (current.total > max.total ? current : max), dayRes.data[0]);
-                peakDay = topDay.day;
-            }
-        } catch (pythonError) {
-            console.error("⚠️ Python no está corriendo o falló:", pythonError.message);
-        }
-
-        // 3. Enviamos todo consolidado al Admin Dashboard
-        res.json({
-            total_spots: total_spots || 0,
-            total_reservations: total_res || 0,
-            total_revenue: revenue || 0,
-            total_users: users || 0,
-            dist: { pending: 20, in_use: 30, completed: 40, rejected: 10 }, 
-            avg_booking: total_res > 0 ? (revenue / total_res) : 0,
-            python: {
-                projection: pythonProjection,
-                occupancy: pythonOccupancy,
-                peak_day: peakDay
-            }
-        });
+        connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'INSERT INTO reservations (id, spotId, userEmail, date, startTime, endTime, amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, spotId, userEmail, date, startTime, endTime, amount, status]
+        );
+        res.status(201).json({ message: "Reservation saved" });
     } catch (error) {
-        console.error("Error en métricas:", error);
-        res.status(500).json({ error: "Backend error" });
+        res.status(500).json({ error: "Failed to save reservation" });
+    } finally {
+        if (connection) await connection.end();
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Parkly API Node.js corriendo en http://localhost:${PORT}`);
-});
+// --- 4. ARRANQUE DEL SERVIDOR (Necesario para ejecucion local) ---
+const PORT = process.env.PORT || 3000;
+
+// Solo ejecuta el listener si no estamos en entorno de produccion de Vercel
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log("Servidor Parkly activo");
+        console.log("Puerto: " + PORT);
+        console.log("URL: http://localhost:" + PORT);
+        console.log("Conectado a TiDB: " + dbConfig.host);
+    });
+}
+
+export default app;

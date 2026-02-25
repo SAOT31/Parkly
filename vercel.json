@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" },
+    { "src": "IA/chatbot.js", "use": "@vercel/node" },
+    { "src": "stats.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/api/chat/(.*)", "dest": "IA/chatbot.js" },
+    { "src": "/api/python/stats/(.*)", "dest": "stats.py" },
+    { "src": "/api/(.*)", "dest": "server.js" },
+    { "src": "/(.*)", "dest": "/public/$1", "check": true }
+  ]
+}

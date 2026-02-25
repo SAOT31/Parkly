@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Detail — PARKLY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    </head>
+<body class="bg-background text-foreground min-h-screen font-sans antialiased">
+
+    <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
+        <nav class="max-w-7xl mx-auto flex justify-between items-center" aria-label="Main navigation">
+            <a href="index.html" aria-label="Parkly home" class="flex items-center gap-2 font-bold text-xl text-white group">
+                <i data-lucide="circle-parking" class="text-primary group-hover:rotate-12 transition-transform" aria-hidden="true"></i>
+                <span class="tracking-tighter uppercase italic">PARK<span class="text-primary">LY</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle" aria-label="Toggle theme" class="p-2 rounded-lg border border-border hover:border-primary/50 transition-colors">
+                    </button>
+                <div class="flex items-center gap-2 border border-border rounded-full px-3 py-1 bg-[#1e293b]" role="status" aria-label="Current user">
+                    <span id="nav-username" class="text-xs font-bold text-white">Guest</span>
+                    <span id="nav-role" class="text-[10px] bg-blue-900/50 text-blue-300 px-1.5 rounded font-black uppercase">Driver</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <nav aria-label="Breadcrumb" class="mb-6">
+            <a href="search.html" class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
+                <i data-lucide="arrow-left" class="w-4 h-4" aria-hidden="true"></i>
+                Back to results
+            </a>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="lg:col-span-2 space-y-8">
+                <section aria-label="Photo gallery">
+                    <figure class="relative h-[420px] rounded-3xl overflow-hidden border border-border m-0 group">
+                        <img id="gallery-main-img" src="" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" aria-hidden="true"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6">
+                            <div id="features-badges" class="flex flex-wrap gap-2 mb-3"></div>
+                            <h1 id="spot-name" class="text-3xl font-extrabold text-white leading-tight drop-shadow"></h1>
+                            <address id="spot-address" class="not-italic text-slate-300 flex items-center gap-1.5 text-sm mt-1 font-style-normal">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0" aria-hidden="true"></i>
+                                <span id="spot-address-text"></span>
+                            </address>
+                        </div>
+                    </figure>
+                    <div id="gallery-thumbs" class="flex gap-2 mt-3" role="list" aria-label="Photo thumbnails"></div>
+                </section>
+
+                <section aria-label="Rating and rates" class="grid grid-cols-4 gap-3">
+                    <div class="bg-card border border-border rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-1">
+                        <div class="flex items-center gap-1 text-yellow-400 font-black text-xl">
+                            <i data-lucide="star" class="w-5 h-5 fill-current" aria-hidden="true"></i>
+                            <output id="spot-rating">—</output>
+                        </div>
+                        <span id="spot-review-count" class="text-[11px] text-slate-500"></span>
+                    </div>
+                    <div class="bg-card border border-primary/40 rounded-2xl p-4 text-center">
+                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Hour</p>
+                        <p id="price-hour" class="text-lg font-black text-white">—</p>
+                    </div>
+                    <div class="bg-card border border-border rounded-2xl p-4 text-center">
+                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Day</p>
+                        <p id="price-day" class="text-lg font-black text-white">—</p>
+                    </div>
+                    <div class="bg-card border border-border rounded-2xl p-4 text-center">
+                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Month</p>
+                        <p id="price-month" class="text-lg font-black text-white">—</p>
+                    </div>
+                </section>
+
+                <section id="occupancy-section" aria-label="Occupancy" class="bg-card border border-border rounded-2xl p-5 hidden">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-400">Occupancy <strong id="occupancy-pct" class="text-white"></strong></span>
+                        <span id="spots-left" class="font-bold"></span>
+                    </div>
+                    <div class="h-2 bg-border rounded-full overflow-hidden" role="progressbar" id="occupancy-bar-wrap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div id="occupancy-bar" class="h-full rounded-full transition-all duration-700 bg-primary" style="width:0%"></div>
+                    </div>
+                </section>
+
+                <section id="services-section" aria-label="Services" class="hidden">
+                    <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Services</h2>
+                    <ul id="services-list" class="flex flex-wrap gap-2 list-none p-0 m-0"></ul>
+                </section>
+
+                <div id="contact-section" class="hidden">
+                    <div class="flex items-center gap-4 p-4 bg-card border border-border rounded-2xl">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                            <i data-lucide="phone" class="w-5 h-5 text-primary" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Contact</p>
+                            <a id="spot-phone" href="" class="text-white font-semibold hover:text-primary transition-colors"></a>
+                        </div>
+                    </div>
+                </div>
+
+                <section aria-label="Location">
+                    <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Location</h2>
+                    <button id="btn-open-map" aria-label="Open expanded map" class="w-full h-52 bg-slate-900 rounded-2xl border border-border overflow-hidden hover:border-primary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 block">
+                        <div id="map-embed" class="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-2">
+                            <i data-lucide="map" class="w-10 h-10" aria-hidden="true"></i>
+                            <span class="text-xs">Click to open map</span>
+                        </div>
+                    </button>
+                </section>
+
+                <section aria-label="Reviews" class="bg-card border border-border rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-base font-black text-white">Reviews</h2>
+                        <div id="reviews-avg" class="flex items-center gap-2 text-yellow-400 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-lg">
+                            <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
+                            <output id="reviews-score">—</output>
+                            <span id="reviews-count" class="text-slate-500 font-normal text-xs"></span>
+                        </div>
+                    </div>
+                    <div id="reviews-list" class="space-y-4">
+                        <p id="no-reviews-msg" class="text-slate-500 text-sm">No reviews yet. Be the first to review!</p>
+                    </div>
+                </section>
+            </div>
+
+            <aside aria-label="Book this spot">
+                <div class="bg-card border border-border rounded-3xl p-6 sticky top-24">
+                    <h2 class="text-base font-black text-white mb-5 flex items-center gap-2">
+                        <i data-lucide="calendar-check" class="w-5 h-5 text-primary" aria-hidden="true"></i>
+                        Book this spot
+                    </h2>
+
+                    <div id="booking-available">
+                        <div class="p-3 bg-background border border-border rounded-xl flex justify-between items-center text-sm mb-4">
+                            <span class="text-slate-400">Price / hour</span>
+                            <strong id="booking-price" class="text-white text-base">—</strong>
+                        </div>
+
+                        <form id="booking-form" novalidate class="space-y-4">
+                            <div>
+                                <label for="book-date" class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Date</label>
+                                <input type="date" id="book-date" name="date" required class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/60 transition-colors cursor-pointer">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="book-start" class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">From</label>
+                                    <input type="time" id="book-start" name="start-time" required value="09:00" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/60 transition-colors cursor-pointer">
+                                </div>
+                                <div>
+                                    <label for="book-end" class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">To</label>
+                                    <input type="time" id="book-end" name="end-time" required value="11:00" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/60 transition-colors cursor-pointer">
+                                </div>
+                            </div>
+
+                            <div id="price-calc-container" aria-live="polite">
+                                <p id="calc-error" role="alert" class="hidden text-xs text-red-400 flex items-center gap-1.5 py-2">
+                                    <i data-lucide="alert-circle" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                                    End time must be after start time.
+                                </p>
+                                <dl id="calc-breakdown" class="hidden bg-background border border-border rounded-xl p-4 space-y-2 text-sm">
+                                    <div class="flex justify-between"><dt class="text-slate-400">Duration</dt><dd id="val-duration" class="text-white font-medium"></dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-400">Subtotal</dt><dd id="val-subtotal" class="text-white font-medium"></dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-400">Service fee</dt><dd id="val-fee" class="text-white font-medium"></dd></div>
+                                    <div class="flex justify-between pt-2 border-t border-border"><dt class="font-bold text-white">Total</dt><dd id="val-total" class="text-xl font-black text-primary"></dd></div>
+                                </dl>
+                            </div>
+
+                            <button type="submit" id="btn-book" disabled class="w-full bg-primary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                                <i data-lucide="credit-card" class="w-5 h-5" aria-hidden="true"></i> Book Now →
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="booking-full" class="hidden text-center py-6 text-slate-500">
+                        <div class="text-4xl mb-3" aria-hidden="true">🔴</div>
+                        <strong class="text-white block mb-2">This spot is currently full</strong>
+                        <p class="text-sm mb-4">Check back later or search nearby.</p>
+                        <a href="search.html" class="inline-block px-5 py-2 border border-border rounded-xl text-sm hover:border-primary/50 transition-colors">Search Other Spots</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <dialog id="map-modal" aria-labelledby="map-modal-title" aria-modal="true" class="bg-card border border-border rounded-3xl overflow-hidden w-full max-w-2xl p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+            <h2 id="map-modal-title" class="font-bold text-white text-sm">Location</h2>
+            <button id="btn-close-map" aria-label="Close map" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+                <i data-lucide="x" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div id="map-modal-content" class="h-[420px] bg-slate-800">
+            <iframe id="map-iframe" width="100%" height="100%" style="border:0" allowfullscreen loading="lazy" title="Map location"></iframe>
+        </div>
+    </dialog>
+
+    <template id="tpl-gallery-thumb">
+        <button type="button" role="listitem" class="h-16 w-20 rounded-xl overflow-hidden border-2 transition-all shrink-0 focus:outline-none">
+            <img src="" alt="" class="w-full h-full object-cover">
+        </button>
+    </template>
+    <template id="tpl-review">
+        <article class="border-b border-border pb-4 last:border-0">
+            <header class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <div class="user-initial w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-bold text-primary" aria-hidden="true"></div>
+                    <div>
+                        <p class="user-name text-sm font-semibold text-white"></p>
+                        <time class="review-date text-[11px] text-slate-500"></time>
+                    </div>
+                </div>
+                <div class="review-stars text-yellow-400 text-sm"></div>
+            </header>
+            <p class="review-comment text-sm text-slate-400"></p>
+        </article>
+    </template>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/detail.js"></script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PARKLY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex flex-col min-h-screen bg-background text-foreground font-sans antialiased transition-colors duration-300">
+
+    <header class="sticky top-0 z-50 border-b border-border bg-[#020617]/80 backdrop-blur-md px-6 py-3">
+        <nav class="flex items-center justify-between gap-4" aria-label="Main Navigation">
+            <a href="index.html" class="flex items-center gap-2 mr-8 group" aria-label="Home">
+                <div class="bg-primary/10 p-1 rounded-lg group-hover:bg-primary/20 transition-colors">
+                    <i data-lucide="circle-parking" class="h-6 w-6 text-primary group-hover:scale-110 transition-transform"></i>
+                </div>
+                <span class="text-xl font-black tracking-tighter text-white">PARK<span class="text-primary">LY</span></span>
+            </a>
+            
+            <div class="flex-1 max-w-xl hidden md:block">
+                <div class="relative group">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-primary transition-colors"></i>
+                    <input type="text" id="admin-table-filter" placeholder="Search users, spots, or bookings..." class="w-full bg-[#0f172a] border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button id="btn-nav-search" class="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-900/20 text-blue-400 hover:bg-blue-900/40 rounded-xl text-sm font-bold transition-all border border-blue-900/30">
+                    <i data-lucide="compass" class="w-4 h-4"></i> View App
+                </button>
+                <button id="theme-toggle" aria-label="Toggle theme" class="p-2 rounded-lg bg-[#0f172a] border border-slate-800 hover:border-primary/50 transition-all"></button>
+                <div class="h-8 w-px bg-slate-800 mx-1"></div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-bold text-white leading-none">Admin Panel</p>
+                        <p class="text-[10px] text-primary uppercase font-black tracking-widest mt-0.5">Superuser</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-primary/20">
+                        A
+                    </div>
+                </div>
+                <button id="btn-logout" class="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors ml-2">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
+        <header class="mb-8">
+            <h1 class="text-2xl font-black text-white mb-2">Control Center</h1>
+            <p class="text-sm text-slate-400">Manage the entire platform from one place.</p>
+        </header>
+
+        <nav id="tabs-container" class="flex overflow-x-auto border-b border-slate-800 mb-8 scrollbar-hide" aria-label="Admin Sections">
+            <button data-tab="summary" class="tab-btn active-tab flex items-center gap-2 px-6 py-2.5 text-sm font-bold border-b-2 border-primary text-primary transition-all" role="tab">
+                Overview
+            </button>
+            <button data-tab="spots" class="tab-btn flex items-center gap-2 px-6 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white transition-all" role="tab">
+                Spots <span id="badge-spots" class="ml-1.5 bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+            </button>
+            <button data-tab="reservations" class="tab-btn flex items-center gap-2 px-6 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white transition-all" role="tab">
+                Bookings <span id="badge-reservations" class="ml-1.5 bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+            </button>
+            <button data-tab="users" class="tab-btn flex items-center gap-2 px-6 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white transition-all" role="tab">
+                Users <span id="badge-users" class="ml-1.5 bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+            </button>
+            <button data-tab="requests" class="tab-btn flex items-center gap-2 px-6 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white transition-all" role="tab">
+                Spot Requests <span id="badge-requests" class="ml-1.5 bg-yellow-900/50 text-yellow-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+            </button>
+        </nav>
+
+        <section id="view-summary" class="animate-fade-in" aria-live="polite">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="kpi-container"></div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <article class="bg-[#0f172a] border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest mb-8">Reservation status distribution</h3>
+                    <div id="status-distribution-container" class="space-y-5"></div>
+                </article>
+                <article class="bg-[#0f172a] border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest mb-8">Quick metrics</h3>
+                    <div id="quick-metrics-container" class="space-y-4"></div>
+                </article>
+            </div>
+
+            <section>
+                <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6">Revenue by payment method</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="payment-methods-container"></div>
+            </section>
+        </section>
+
+        <section id="view-requests" class="hidden animate-fade-in" aria-live="polite">
+            <div id="pending-requests-wrapper">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i data-lucide="clock" class="w-4 h-4 text-yellow-400"></i> Pending Approval (<span id="pending-count">0</span>)
+                </h3>
+                <div id="pending-requests-container" class="space-y-4 mb-8"></div>
+            </div>
+
+            <div id="resolved-requests-wrapper">
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Resolved Requests (<span id="resolved-count">0</span>)</h3>
+                <div id="resolved-requests-container" class="space-y-3"></div>
+            </div>
+
+            <div id="empty-requests" class="hidden text-center py-20">
+                <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="inbox" class="w-8 h-8 text-slate-500"></i>
+                </div>
+                <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">No pending requests</p>
+            </div>
+        </section>
+
+        <section id="view-table" class="hidden animate-fade-in" aria-live="polite">
+            <div class="bg-card border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-900/50 text-[10px] uppercase font-black text-slate-500 border-b border-slate-800">
+                        <tr>
+                            <th class="p-4">Item</th>
+                            <th class="p-4">Status / Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-sm text-slate-300 divide-y divide-slate-800/30"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <template id="tpl-kpi-card">
+        <article class="bg-[#0f172a] border border-slate-800 p-5 rounded-2xl">
+            <div class="kpi-icon-box w-10 h-10 rounded-xl flex items-center justify-center mb-4">
+                <i class="kpi-icon w-5 h-5"></i>
+            </div>
+            <h3 class="kpi-value text-3xl font-bold text-white mb-1 tracking-tighter"></h3>
+            <p class="kpi-label text-[10px] text-slate-500 font-bold uppercase tracking-wider"></p>
+        </article>
+    </template>
+
+    <template id="tpl-status-bar">
+        <div class="flex items-center gap-3 text-xs">
+            <span class="status-label w-20 text-slate-500 font-bold"></span>
+            <div class="flex-1 h-2 bg-[#020617] rounded-full overflow-hidden">
+                <div class="status-fill h-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+            <span class="status-count w-6 text-right text-white font-bold"></span>
+        </div>
+    </template>
+
+    <template id="tpl-metric-row">
+        <div class="flex justify-between items-center p-3.5 bg-[#020617]/50 border border-slate-800 rounded-xl">
+            <div class="flex items-center gap-2">
+                <i class="metric-icon w-4 h-4 text-slate-500"></i>
+                <span class="metric-label text-sm text-slate-400 font-medium"></span>
+            </div>
+            <span class="metric-value text-sm font-bold"></span>
+        </div>
+    </template>
+
+    <template id="tpl-payment-card">
+        <article class="p-5 bg-[#0f172a] border border-slate-800 rounded-2xl text-center">
+            <p class="payment-method text-[10px] text-slate-500 font-bold uppercase mb-2"></p>
+            <p class="payment-count text-2xl font-bold text-white mb-1"></p>
+            <p class="payment-amount text-[10px] font-bold text-blue-400"></p>
+        </article>
+    </template>
+
+    <template id="tpl-pending-request">
+        <article class="bg-[#0f172a] border border-yellow-900/40 rounded-2xl overflow-hidden shadow-lg">
+            <div class="flex gap-5 p-5">
+                <img class="req-img w-28 h-20 rounded-xl object-cover bg-slate-800 flex-shrink-0" src="" alt="">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-4 mb-1">
+                        <h4 class="req-name font-bold text-white text-base leading-tight"></h4>
+                        <span class="flex-shrink-0 text-[10px] font-black px-2 py-1 bg-yellow-900/40 text-yellow-400 rounded-lg uppercase tracking-wide">Pending</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> <span class="req-address"></span></p>
+                    <p class="text-xs text-slate-500 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> Owner: <span class="req-owner-name text-slate-300 ml-1 font-medium"></span> <span class="req-owner-id text-slate-600 ml-1"></span></p>
+                    <div class="flex gap-3 mt-2 text-xs text-slate-400">
+                        <span class="req-price"></span> <span>·</span> <span class="req-cells"></span> <span>·</span> <span class="req-schedule"></span> <span>·</span>
+                        <span>Cert: <span class="req-cert text-slate-300"></span></span>
+                    </div>
+                    <div class="req-features flex flex-wrap gap-1 mt-2"></div>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-800 px-5 py-4 bg-[#020617]/30">
+                <div class="reject-panel hidden mb-4 bg-red-950/30 border border-red-900/40 rounded-xl p-4 space-y-3">
+                    <p class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2">Select rejection reason:</p>
+                    <div class="reasons-container space-y-2"></div>
+                    <div class="flex gap-2 mt-3">
+                        <button class="btn-confirm-reject flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-1">
+                            <i data-lucide="x-circle" class="w-3 h-3"></i> Confirm Rejection
+                        </button>
+                        <button class="btn-cancel-reject px-4 py-2 text-xs text-slate-400 hover:text-white transition-colors">Cancel</button>
+                    </div>
+                </div>
+                <div class="action-buttons flex gap-3">
+                    <button class="btn-approve flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-900/30">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> Approve
+                    </button>
+                    <button class="btn-show-reject flex-1 bg-red-900/30 hover:bg-red-800/40 text-red-400 border border-red-900/50 text-sm font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="x-circle" class="w-4 h-4"></i> Reject
+                    </button>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-resolved-request">
+        <div class="flex items-center gap-4 p-4 bg-[#0f172a] border border-slate-800 rounded-2xl">
+            <div class="resolved-icon-box w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="resolved-icon w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="resolved-name text-sm font-bold text-white truncate"></p>
+                <p class="resolved-owner text-xs text-slate-500"></p>
+            </div>
+            <span class="resolved-badge text-[10px] font-black px-2 py-1 rounded-lg uppercase"></span>
+        </div>
+    </template>
+
+    <template id="tpl-table-row">
+        <tr class="hover:bg-slate-800/20 transition-colors">
+            <td class="cell-primary p-4 font-bold text-white"></td>
+            <td class="cell-secondary p-4"></td>
+        </tr>
+    </template>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

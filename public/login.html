@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - PARKLY</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/tailwind-config.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
+    <script src="./js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="./css/styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <script>
         (function() {
             const theme = localStorage.getItem('parkly_theme') || 'dark';
@@ -20,7 +21,7 @@
     <main class="w-full max-w-[420px]">
         
         <nav aria-label="Return to Home">
-            <a href="index.html" class="flex items-center gap-2 text-sm text-gray-500 hover:text-white mb-8 transition-colors group">
+            <a href="./index.html" class="flex items-center gap-2 text-sm text-gray-500 hover:text-white mb-8 transition-colors group">
                 <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i> 
                 Back to home
             </a>
@@ -93,14 +94,14 @@
 
         <footer class="text-center mt-8">
             <p class="text-gray-500 text-sm">
-                Don't have an account? <a href="register.html" class="text-primary hover:underline font-semibold transition-colors">Sign up free</a>
+                Don't have an account? <a href="./register.html" class="text-primary hover:underline font-semibold transition-colors">Sign up free</a>
             </p>
         </footer>
     </main>
 
-    <script src="js/data.js"></script>
-    <script src="js/auth.js"></script>
-    <script type="module" src="js/google-auth.js"></script>
+    <script src="./js/data.js"></script>
+    <script src="./js/auth.js"></script>
+    <script type="module" src="./js/google-auth.js"></script>
     <script>lucide.createIcons();</script>
 </body>
 </html>

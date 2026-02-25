@@ -20,14 +20,13 @@
                 </span>
             </a>
             <div id="nav-actions" class="flex items-center gap-4">
-                <a href="login.html" class="text-sm font-medium text-gray-400 hover:text-white transition-colors">Log in</a>
+                <a href="./login.html" id="btn-nav-login" class="text-sm font-medium text-gray-400 hover:text-white transition-colors cursor-pointer">Log in</a>
                 <a href="register.html" class="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-blue-600 shadow-lg shadow-primary/20">Sign up</a>
             </div>
         </nav>
     </header>
 
     <main class="flex-1">
-        
         <section class="relative pt-24 pb-20 overflow-hidden text-center px-4">
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/20 blur-[120px] rounded-full opacity-20 pointer-events-none"></div>
 
@@ -55,7 +54,7 @@
                         Get Started Free
                         <i data-lucide="arrow-right" class="h-5 w-5"></i>
                     </a>
-                    <a href="login.html" class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/50 px-8 py-4 text-base font-bold text-white transition-all hover:bg-card">
+                    <a href="./login.html" id="btn-hero-login" class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/50 px-8 py-4 text-base font-bold text-white transition-all hover:bg-card cursor-pointer">
                         I have an account
                     </a>
                 </div>
@@ -188,10 +187,10 @@
             <div class="container mx-auto px-6 text-center">
                 <h2 class="text-3xl font-bold mb-4 text-white">Do you have a parking spot?</h2>
                 <p class="text-gray-400 mb-8 max-w-2xl mx-auto">Publish your space and start earning income today. Thousands of drivers are looking for parking near you.</p>
-                <button onclick="window.location.href='register.html'" class="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-bold text-white transition-all hover:bg-blue-600 hover:scale-105 shadow-lg shadow-primary/20">
+                <a href="register.html" class="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-bold text-white transition-all hover:bg-blue-600 hover:scale-105 shadow-lg shadow-primary/20">
                     Register as Owner
                     <i data-lucide="chevron-right" class="h-5 w-5"></i>
-                </button>
+                </a>
             </div>
         </section>
     </main>
