@@ -13,12 +13,16 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ── CONFIGURACIÓN DE TU BASE DE DATOS (DBeaver) ──
+// ── CONFIGURACIÓN DE TU BASE DE DATOS EN LA NUBE (TiDB) ──
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '1234', // Asegúrate de que esta sea tu clave de MySQL
-    database: 'parkly'
+    host: 'gateway01.us-east-1.prod.aws.tidbcloud.com',
+    port: 4000,
+    user: '2JfVpYk98ujjzeJ.root',
+    password: 'EIzjGWrDD280LttB',
+    database: 'test',
+    ssl: {
+        rejectUnauthorized: true // Obligatorio para bases de datos en la nube
+    }
 };
 
 // ── 1. LOGIN ──
