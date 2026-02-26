@@ -2,9 +2,10 @@
  * ARCHIVO: js/search.js
  * DESCRIPCIÓN: Lógica de búsqueda con sidebar de filtros.
  * 100% conectado a la API de Node.js y TiDB Cloud.
+ *
  */
 
-// ── Estado ───────────────────────────────────────────────────────────
+// ── Estado de los Filtros ───────────────────────────────────────────
 const filters = {
     sortBy:        'name',
     zone:          '',
@@ -17,7 +18,7 @@ const filters = {
     isIlluminated: false,
 };
 
-// Variable global para guardar los datos que vienen de la Base de Datos
+// Variable global para guardar los datos reales de TiDB Cloud
 let globalSpots = []; 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (navRole) navRole.textContent = session.role || 'Driver';
     }
 
-    // Lógica de Logout integrada para el nuevo botón
+    // Lógica de Logout
     document.getElementById('logout-btn')?.addEventListener('click', () => {
         localStorage.removeItem('parkly_session');
         window.location.href = 'login.html';
@@ -39,11 +40,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── 2. Carga de datos desde el Servidor (API) ───────────────────
     try {
-        // Reemplazamos DB.getSpots() por una llamada real al servidor local
+        // Llamada real a tu backend de Node.js
         const response = await fetch('/api/spots');
-        globalSpots = await response.json(); 
+        if (!response.ok) throw new Error('Failed to fetch data from server');
         
-        // Poblar el selector de zonas dinámicamente
+        globalSpots = await response.json(); 
+        console.log(`Database Sync: ${globalSpots.length} spots loaded successfully.`);
+        
+        // Poblar el selector de zonas dinámicamente con datos de la DB
         const zoneSelect = document.getElementById('zone-filter');
         const zones = [...new Set(globalSpots.map(s => s.zone).filter(Boolean))].sort();
         
@@ -54,10 +58,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             zoneSelect?.appendChild(opt);
         });
 
-        // Renderizado inicial con datos de la BD
+        // Renderizado inicial
         renderParkings();
     } catch (error) {
-        console.error("Critical: Could not load data from Node server.", error);
+        console.error("Critical Error: Search engine could not connect to API.", error);
+        // Alerta al usuario en inglés
+        alert("The parking data could not be loaded. Please check your connection.");
     }
 
     // ── 3. Gestión de URL ───────────────────────────────────────────
@@ -93,7 +99,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         el.addEventListener('click', () => {
             toggleFilter(el.dataset.toggle);
         });
-        // Soporte para accesibilidad (teclado)
         el.addEventListener('keydown', e => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -103,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// ── Renderizar cards ─────────────────────────────────────────────────
+// ── Renderizar cards (DOM Puro) ─────────────────────────────────────────────────
 function renderParkings() {
     const grid       = document.getElementById('spots-grid');
     const counter    = document.getElementById('spot-count');
@@ -121,49 +126,42 @@ function renderParkings() {
         const clone = tpl.content.cloneNode(true);
         const article = clone.querySelector('article');
 
-        // Navegación al detalle
+        // Navegación al detalle del parqueadero
         article.addEventListener('click', () => {
             window.location.href = `detail.html?id=${spot.id}`;
         });
 
-        // Imagen y manejo de errores
+        // Imagen y manejo de errores de carga
         const img = clone.querySelector('[data-field="image"]');
-        img.src = spot.image || 'img/default-parking.jpg';
+        img.src = spot.image || 'img/placeholder.jpg';
         img.alt = spot.name;
         
-        img.onerror = () => {
-            img.src = 'img/placeholder.jpg'; // Imagen de respaldo
-        };
+        img.onerror = () => { img.src = 'img/placeholder.jpg'; };
 
-        // Badges
+        // Lógica de Badges (Verified y Availability)
         const badgeVerified = clone.querySelector('[data-field="badge-verified"]');
         if (spot.verified) badgeVerified.classList.replace('hidden', 'flex');
 
         const badgeStatus = clone.querySelector('[data-field="badge-status"]');
         const badgeLabel  = clone.querySelector('[data-field="badge-label"]');
-        const badgeIcon   = clone.querySelector('[data-field="badge-icon"]');
         
-        // Lógica de disponibilidad
         if (spot.available !== false) {
             badgeStatus.classList.add('bg-green-600');
             badgeLabel.textContent = 'Available';
-            if (badgeIcon) badgeIcon.setAttribute('data-lucide', 'check-circle');
         } else {
             badgeStatus.classList.add('bg-red-600');
             badgeLabel.textContent = 'Occupied';
-            if (badgeIcon) badgeIcon.setAttribute('data-lucide', 'x-circle');
         }
 
-        // Mapeo de datos (price ya viene mapeado como 'price' desde server.js)
+        // Mapeo de datos (price y rating desde la DB)
         clone.querySelector('[data-field="price"]').textContent   = Number(spot.price).toLocaleString('es-CO');
         clone.querySelector('[data-field="name"]').textContent    = spot.name;
         clone.querySelector('[data-field="rating"]').textContent  = spot.rating || '5.0';
         clone.querySelector('[data-field="address"]').textContent = spot.address;
         clone.querySelector('[data-field="zone"]').textContent    = spot.zone || '';
 
-        // Iconos de características dinámicos
-        const featIcons = ['isIlluminated', 'hasSecurity', 'evCharging', 'is24h'];
-        featIcons.forEach(f => {
+        // Iconos de características dinámicos (Flexbox/Grid visual)
+        ['isIlluminated', 'hasSecurity', 'evCharging', 'is24h'].forEach(f => {
             const icon = clone.querySelector(`[data-feat="${f}"]`);
             if (icon) {
                 if (spot[f]) {
@@ -183,7 +181,7 @@ function renderParkings() {
     updateFilterCount();
 }
 
-// ── Filtrar y ordenar ────────────────────────────────────────────────
+// ── Lógica de filtrado y ordenamiento ────────────────────────────────────────────────
 function getFilteredParkings() {
     const searchEl = document.getElementById('search-input');
     const query = searchEl ? searchEl.value.toLowerCase().trim() : '';
@@ -221,7 +219,7 @@ function getFilteredParkings() {
     return spots;
 }
 
-// ── Helpers de UI ────────────────────────────────────────────────────
+// ── Helpers de UI y Reseteo ────────────────────────────────────────────────────
 function setSortBy(el, val) {
     filters.sortBy = val;
     document.querySelectorAll('.sort-opt').forEach(btn => {
@@ -239,12 +237,7 @@ function updatePriceLabel() {
     filters.priceMax = val;
     
     const label = document.getElementById('price-label');
-    if (label) {
-        label.textContent = val >= 20000 ? 'Any' : `$${val.toLocaleString('es-CO')}`;
-    }
-    
-    slider.setAttribute('aria-valuenow', val);
-    slider.setAttribute('aria-valuetext', val >= 20000 ? 'Any' : `$${val.toLocaleString('es-CO')}`);
+    if (label) label.textContent = val >= 20000 ? 'Any' : `$${val.toLocaleString('es-CO')}`;
     
     renderParkings();
 }
@@ -261,14 +254,9 @@ function toggleFilter(key) {
 
 function updateFilterCount() {
     const active = [
-        filters.zone,
-        filters.priceMax < 20000,
-        filters.verified,
-        filters.available,
-        filters.is24h,
-        filters.evCharging,
-        filters.hasSecurity,
-        filters.isIlluminated
+        filters.zone, filters.priceMax < 20000, filters.verified,
+        filters.available, filters.is24h, filters.evCharging,
+        filters.hasSecurity, filters.isIlluminated
     ].filter(Boolean).length;
 
     const badge = document.getElementById('filter-count');
@@ -293,34 +281,17 @@ function resetAll() {
     // Resetear inputs del DOM
     const searchEl = document.getElementById('search-input');
     if (searchEl) searchEl.value = '';
-
     const zoneFilter = document.getElementById('zone-filter');
     if (zoneFilter) zoneFilter.value  = '';
-    
     const priceSlider = document.getElementById('price-slider');
     if (priceSlider) priceSlider.value = 20000;
-    
     const priceLabel = document.getElementById('price-label');
     if (priceLabel) priceLabel.textContent = 'Any';
 
     // Resetear visualmente los toggles
     ['verified','available','is24h','evCharging','hasSecurity','isIlluminated'].forEach(k => {
         const t = document.getElementById('toggle-' + k);
-        if (t) { 
-            t.classList.remove('on'); 
-            t.setAttribute('aria-checked', 'false'); 
-        }
-    });
-
-    // Resetear botones de ordenamiento
-    document.querySelectorAll('.sort-opt').forEach((el) => {
-        if (el.dataset.sort === 'name') {
-            el.classList.add('active');
-            el.setAttribute('aria-checked', 'true');
-        } else {
-            el.classList.remove('active');
-            el.setAttribute('aria-checked', 'false');
-        }
+        if (t) { t.classList.remove('on'); t.setAttribute('aria-checked', 'false'); }
     });
 
     renderParkings();

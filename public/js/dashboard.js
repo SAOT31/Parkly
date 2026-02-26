@@ -1,7 +1,6 @@
 /**
  * ARCHIVO: js/dashboard.js
- * Dashboard del cliente conectado a la Base de Datos real.
- *
+ * Dashboard del cliente conectado a la Base de Datos real de TiDB Cloud.
  */
 
 let currentTab     = 'all';
@@ -60,15 +59,17 @@ async function renderReservations() {
     const session = JSON.parse(localStorage.getItem('parkly_session'));
     if (!list || !session) return;
 
-    // 2. CARGA DESDE EL SERVIDOR (Reemplaza DB.getReservations)
+    // 2. CARGA DESDE EL SERVIDOR (TiDB Cloud)
     let reservations = [];
     try {
         const response = await fetch('/api/reservations');
         const allData  = await response.json();
-        // Filtramos solo las reservas de este usuario por email
+        
+        // Filtramos solo las reservas del usuario logueado
         reservations = allData.filter(r => r.userEmail === session.email);
+        console.log(`Sync success: ${reservations.length} reservations found for ${session.email}.`);
     } catch (error) {
-        console.error("Dashboard Error: Could not fetch from TiDB.", error);
+        console.error("Dashboard Error: Could not fetch from database server.", error);
     }
 
     // Filtrado por pestaña actual
@@ -79,14 +80,14 @@ async function renderReservations() {
 
     list.innerHTML = '';
 
-    // Estado vacío
+    // Manejo de estado vacío
     if (reservations.length === 0) {
         const emptyTpl = document.getElementById('res-empty-tpl');
         const clone    = emptyTpl.content.cloneNode(true);
         const isAll    = currentTab === 'all';
-        clone.querySelector('[data-field=\"title\"]').textContent    = isAll ? 'No bookings yet.' : `No ${currentTab} reservations.`;
-        clone.querySelector('[data-field=\"subtitle\"]').textContent = isAll ? 'Find your first parking spot and get started.' : 'Switch tabs to see other bookings.';
-        if (isAll) clone.querySelector('[data-field=\"cta\"]').classList.remove('hidden');
+        clone.querySelector('[data-field="title"]').textContent    = isAll ? 'No bookings yet.' : `No ${currentTab} reservations.`;
+        clone.querySelector('[data-field="subtitle"]').textContent = isAll ? 'Find your first parking spot and get started.' : 'Switch tabs to see other bookings.';
+        if (isAll) clone.querySelector('[data-field="cta"]').classList.remove('hidden');
         list.appendChild(clone);
         if (window.lucide) lucide.createIcons();
         return;
@@ -102,24 +103,24 @@ function buildCard(r) {
     const article = clone.querySelector('article');
     article.id = `res-${r.id}`;
 
-    // Pintar imagen si existe
+    // Pintar imagen del parqueadero
     if (r.image) {
-        const img = clone.querySelector('[data-field=\"thumb-img\"]');
+        const img = clone.querySelector('[data-field="thumb-img"]');
         img.src   = r.image;
         img.classList.remove('hidden');
-        clone.querySelector('[data-field=\"thumb-placeholder\"]').classList.add('hidden');
+        clone.querySelector('[data-field="thumb-placeholder"]').classList.add('hidden');
     }
 
-    // Mapeo de datos de la Reserva
-    clone.querySelector('[data-field=\"name\"]').textContent       = r.spotName || `Spot #${r.spotId}`;
-    clone.querySelector('[data-field=\"address\"]').textContent    = r.address || 'Address not registered';
-    clone.querySelector('[data-field=\"date\"]').textContent       = r.date || '—';
-    clone.querySelector('[data-field=\"time\"]').textContent       = `${r.startTime} – ${r.endTime}`;
-    clone.querySelector('[data-field=\"duration\"]').textContent   = `${r.hours || 1} hrs`;
-    clone.querySelector('[data-field=\"total\"]').textContent      = `$ ${Number(r.amount).toLocaleString('es-CO')}`;
-    clone.querySelector('[data-field=\"booking-id\"]').textContent = r.id;
+    // Mapeo de datos (Alineado con server.js)
+    clone.querySelector('[data-field="name"]').textContent       = r.spotName || `Spot #${r.spotId}`;
+    clone.querySelector('[data-field="address"]').textContent    = r.address || 'Address not registered';
+    clone.querySelector('[data-field="date"]').textContent       = r.date || '—';
+    clone.querySelector('[data-field="time"]').textContent       = `${r.startTime} – ${r.endTime}`;
+    clone.querySelector('[data-field="duration"]').textContent   = `${r.hours || 1} hrs`;
+    clone.querySelector('[data-field="total"]').textContent      = `$ ${Number(r.amount).toLocaleString('es-CO')}`;
+    clone.querySelector('[data-field="booking-id"]').textContent = `Booking ID: ${r.id}`;
 
-    // Estilos de estado
+    // Estilos de estado según el valor de la DB
     const statusStyles = {
         active:    'bg-green-900/30 text-green-400 border border-green-800/50',
         completed: 'bg-blue-900/30 text-blue-400 border border-blue-800/50',
@@ -127,26 +128,27 @@ function buildCard(r) {
         pending:   'bg-yellow-900/30 text-yellow-400 border border-yellow-800/50',
     };
     
-    const badge = clone.querySelector('[data-field=\"status-badge\"]');
+    const badge = clone.querySelector('[data-field="status-badge"]');
     badge.className += ` ${statusStyles[r.status] || ''}`;
-    clone.querySelector('[data-field=\"status-label\"]').textContent = r.status.toUpperCase();
+    clone.querySelector('[data-field="status-label"]').textContent = r.status.toUpperCase();
 
-    // Lógica de botones de acción
+    // Botones de acción (Active/Completed/Cancelled)
     if (r.status === 'active') {
-        const block = clone.querySelector('[data-field=\"progress-block\"]');
+        const block = clone.querySelector('[data-field="progress-block"]');
         block.classList.remove('hidden');
-        clone.querySelector('[data-field=\"end-time\"]').textContent = r.endTime || '—';
-        clone.querySelector('[data-action=\"finish\"]').addEventListener('click', () => updateReservationStatus(r.id, 'completed'));
-        clone.querySelector('[data-action=\"cancel\"]').classList.remove('hidden');
-        clone.querySelector('[data-action=\"cancel\"]').addEventListener('click', () => updateReservationStatus(r.id, 'cancelled'));
+        clone.querySelector('[data-field="end-time"]').textContent = r.endTime || '—';
+        clone.querySelector('[data-action="finish"]').addEventListener('click', () => updateReservationStatus(r.id, 'completed'));
+        clone.querySelector('[data-action="cancel"]').classList.remove('hidden');
+        clone.querySelector('[data-action="cancel"]').addEventListener('click', () => updateReservationStatus(r.id, 'cancelled'));
     }
 
+    // Lógica de reseñas (Review)
     if (r.status === 'completed' && !r.reviewSubmitted) {
-        const btn = clone.querySelector('[data-action=\"review\"]');
+        const btn = clone.querySelector('[data-action="review"]');
         btn.classList.remove('hidden');
         btn.addEventListener('click', () => openReviewModal(r.id));
     } else if (r.status === 'completed' && r.reviewSubmitted) {
-        clone.querySelector('[data-field=\"review-done\"]').classList.replace('hidden', 'flex');
+        clone.querySelector('[data-field="review-done"]').classList.replace('hidden', 'flex');
     }
 
     return clone;
@@ -154,35 +156,43 @@ function buildCard(r) {
 
 // 3. ACTUALIZACIÓN EN SERVIDOR (PATCH)
 async function updateReservationStatus(id, newStatus) {
-    if (newStatus === 'cancelled' && !confirm('Are you sure you want to cancel?')) return;
+    if (newStatus === 'cancelled' && !confirm('Are you sure you want to cancel this booking?')) return;
 
     try {
-        await fetch(`/api/reservations/${id}/status`, {
+        const response = await fetch(`/api/reservations/${id}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus })
         });
-        renderReservations();
+        
+        if (response.ok) {
+            console.log(`Success: Booking ${id} status updated to ${newStatus}.`);
+            renderReservations();
+        }
     } catch (e) {
-        console.error("Update failed:", e);
+        console.error("Update failed: Network error or server unreachable.", e);
     }
 }
 
-// --- Lógica del Modal de Reseñas (Tu código original íntegro) ---
+// --- Lógica del Modal de Reseñas ---
 async function openReviewModal(id) {
-    const response = await fetch('/api/reservations');
-    const reservations = await response.json();
-    const res = reservations.find(r => r.id === id);
-    
-    if (!res || res.status !== 'completed') return;
+    try {
+        const response = await fetch('/api/reservations');
+        const reservations = await response.json();
+        const res = reservations.find(r => r.id === id);
+        
+        if (!res || res.status !== 'completed') return;
 
-    activeReviewId = id;
-    reviewRating   = 0;
+        activeReviewId = id;
+        reviewRating   = 0;
 
-    document.getElementById('review-parking-name').textContent = res.spotName || `Spot #${res.spotId}`;
-    document.getElementById('review-comment').value = '';
-    renderStars(0);
-    document.getElementById('review-dialog').showModal();
+        document.getElementById('review-parking-name').textContent = res.spotName || `Spot #${res.spotId}`;
+        document.getElementById('review-comment').value = '';
+        renderStars(0);
+        document.getElementById('review-dialog').showModal();
+    } catch (error) {
+        console.error("Modal Error: Could not load reservation data for review.", error);
+    }
 }
 
 function closeReviewModal() {
@@ -210,9 +220,11 @@ function renderStars(selected) {
 }
 
 async function submitReview() {
-    if (!activeReviewId || reviewRating === 0) return;
+    if (!activeReviewId || reviewRating === 0) {
+        alert("Please select a star rating before submitting.");
+        return;
+    }
 
-    const session = JSON.parse(localStorage.getItem('parkly_session'));
     const reviewData = {
         reservationId: activeReviewId,
         rating: reviewRating,
@@ -220,14 +232,18 @@ async function submitReview() {
     };
 
     try {
-        await fetch('/api/reviews', {
+        const response = await fetch('/api/reviews', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reviewData)
         });
-        closeReviewModal();
-        renderReservations();
+
+        if (response.ok) {
+            console.log("Review submitted successfully.");
+            closeReviewModal();
+            renderReservations();
+        }
     } catch (e) {
-        console.error("Failed to submit review", e);
+        console.error("Submission failed: Could not post review.", e);
     }
 }
