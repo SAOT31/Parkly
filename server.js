@@ -24,7 +24,6 @@ const dbConfig = {
 };
 
 // --- 1. ADMIN STATISTICS ---
-// Corregido: Quitamos el filtro "status" que causaba error en tu terminal
 app.get('/api/admin/stats', async (req, res) => {
     let connection;
     try {
@@ -71,13 +70,39 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// --- 2.5. REGISTRATION ---
+app.post('/api/register', async (req, res) => {
+    const { name, email, password, phone } = req.body;
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        
+        const [existingUsers] = await connection.execute('SELECT id FROM users WHERE email = ?', [email]);
+        if (existingUsers.length > 0) {
+            return res.status(400).json({ error: "Email already exists" });
+        }
+
+        const [result] = await connection.execute(
+            'INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)',
+            [name, email, password, phone || null, 'client']
+        );
+        
+        console.log(`New user registered: ${email}`);
+        res.status(201).json({ id: result.insertId, name, email, role: 'client' });
+        
+    } catch (error) {
+        console.error("Registration Error:", error.message);
+        res.status(500).json({ error: "Failed to register user." });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
 // --- 3. PARKING SPOTS ---
-// Ajustado: Eliminadas columnas inexistentes (is24h, status) para evitar errores
 app.get('/api/spots', async (req, res) => {
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
-        // Usamos price_hour como 'price' para que el frontend no se rompa
         const [rows] = await connection.execute(
             'SELECT id, name, address, zone, price_hour as price, image FROM parking_spots'
         );
@@ -91,8 +116,7 @@ app.get('/api/spots', async (req, res) => {
     }
 });
 
-// --- 4. RESERVATIONS (The Core Fix) ---
-// Aquí mapeamos tus nombres reales (total_amount, start_time) a lo que el JS espera
+// --- 4. RESERVATIONS ---
 app.get('/api/reservations', async (req, res) => {
     let connection;
     try {
@@ -124,10 +148,9 @@ app.get('/api/reservations', async (req, res) => {
     }
 });
 
-// Ruta para actualizar estado usando tus ENUMS ('pending', 'in-use', etc.)
 app.patch('/api/reservations/:id/status', async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body; // El frontend debe enviar 'in-use' o 'completed'
+    const { status } = req.body;
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
@@ -144,10 +167,19 @@ app.patch('/api/reservations/:id/status', async (req, res) => {
 
 // --- 5. SERVER STARTUP ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log("-----------------------------------------");
     console.log(`   PARKLY SERVER: ACTIVE ON PORT ${PORT}`);
-    console.log(`   DATABASE: ${dbConfig.database} ON ${dbConfig.host}`);
+    
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute('SELECT 1');
+        console.log(`   TIDB CONNECTION: SUCCESSFUL`);
+        await connection.end();
+    } catch (error) {
+        console.log(`   TIDB CONNECTION ERROR:`);
+        console.error(error);
+    }
     console.log("-----------------------------------------");
 });
 

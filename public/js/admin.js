@@ -2,7 +2,6 @@
  * ARCHIVO: js/admin.js
  * DESCRIPCIÓN: Panel Administrativo purificado. Cero inyección de HTML.
  * Uso de DOM API y templates. Lectura asíncrona de base de datos de TiDB Cloud.
- *
  */
 
 // Protección de ruta (Solo Admins)
@@ -35,12 +34,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Función para obtener datos reales del servidor Node.js
     async function loadRealData() {
+        // Detectar si es Live Server o Vercel para asignar la ruta correcta
+        const ADMIN_API_URL = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") 
+            ? "http://localhost:3000/api" 
+            : "/api";
+
         try {
-            // Consultamos la ruta de estadísticas y las listas completas
+            // Consultamos la ruta de estadísticas y las listas completas con la URL dinámica
             const [statsRes, spotsRes, resRes] = await Promise.all([
-                fetch('/api/admin/stats'),
-                fetch('/api/spots'),
-                fetch('/api/reservations')
+                fetch(`${ADMIN_API_URL}/admin/stats`),
+                fetch(`${ADMIN_API_URL}/spots`),
+                fetch(`${ADMIN_API_URL}/reservations`)
             ]);
 
             const statsData = await statsRes.json();
@@ -53,7 +57,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log("Database Sync: Data loaded from TiDB Cloud.");
         } catch (error) {
             console.error("Sync Error: Using local fallback.", error);
-            // Fallback a datos locales si el servidor está caído
             users = JSON.parse(localStorage.getItem('parkly_users')) || [];
             spots = JSON.parse(localStorage.getItem('parkly_spots')) || [];
             reservations = JSON.parse(localStorage.getItem('parkly_reservations')) || [];
@@ -62,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadRealData();
 
-    // --- FUNCIONES DE MÉTRICAS (En inglés para el usuario) ---
+    // --- FUNCIONES DE MÉTRICAS ---
     const getTotalIncome = () => reservations.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
     const getVerifRate = () => spots.length ? Math.round((spots.filter(s=>s.verified).length/spots.length)*100) : 0;
     const getAvgBooking = () => reservations.length ? Math.round(getTotalIncome() / reservations.length) : 0;
@@ -114,7 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- RENDERIZADO DE VISTAS (DOM PURO) ---
     function renderSummary() {
-        // 1. KPIs (Cuadros de mando)
         const kpiContainer = document.getElementById('kpi-container');
         kpiContainer.innerHTML = '';
         const kpis = [
@@ -134,7 +136,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             kpiContainer.appendChild(clone);
         });
 
-        // 2. Status Distribution (Barras de estado)
         const statusContainer = document.getElementById('status-distribution-container');
         statusContainer.innerHTML = '';
         const statuses = [
@@ -154,7 +155,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             statusContainer.appendChild(clone);
         });
 
-        // 3. Quick Metrics
         const metricContainer = document.getElementById('quick-metrics-container');
         metricContainer.innerHTML = '';
         const metrics = [
@@ -175,7 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             metricContainer.appendChild(clone);
         });
 
-        // 4. Payment Methods
         const payContainer = document.getElementById('payment-methods-container');
         payContainer.innerHTML = '';
         const payments = ['PSE', 'Nequi', 'Daviplata', 'Wompi'];
@@ -322,7 +321,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         req.status = 'approved';
         localStorage.setItem('parkly_spot_requests', JSON.stringify(requests));
 
-        // Actualizamos localmente para el dashboard actual
         const newSpot = { ...req, verified: true, earnings: 0, available: true, rating: 5.0 };
         spots.push(newSpot);
         localStorage.setItem('parkly_spots', JSON.stringify(spots));
@@ -370,4 +368,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Arranque inicial
     renderCurrentView();
 });
-admin.js

@@ -1,9 +1,10 @@
 /**
- * ARCHIVO: js/data.js
- * DESCRIPCIÓN: Puente de comunicación entre el frontend y la API de Node.js.
+ * FILE: js/data.js
+ * DESCRIPTION: Communication bridge between frontend and Node.js API.
  */
 
-const API_URL = "/api"; 
+const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+const API_URL = isLocal ? "http://localhost:3000/api" : "/api";
 
 const DB = {
     // 1. Users
