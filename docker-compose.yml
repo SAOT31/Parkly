@@ -18,3 +18,5 @@ services:
       dockerfile: Dockerfile.python
     env_file:
       - .env
+
+      
