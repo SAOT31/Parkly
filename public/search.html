@@ -54,11 +54,17 @@
                     <i data-lucide="log-out" class="w-4 h-4" aria-hidden="true"></i>
                 </button>
 
-                <div class="flex items-center gap-2 border border-border rounded-full px-3 py-1 bg-[#1e293b]"
-                     role="status" aria-label="Logged in user">
+                <a href="profile.html"
+                   class="flex items-center gap-2 border border-border rounded-full pl-1 pr-3 py-1 bg-[#1e293b] hover:border-primary/50 transition-colors"
+                   role="status" aria-label="View profile">
+                    <div class="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-black text-white flex-shrink-0"
+                         style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">
+                        <img id="nav-avatar-img" src="" alt="" class="hidden w-full h-full object-cover">
+                        <span id="nav-avatar-text">?</span>
+                    </div>
                     <span id="nav-username" class="text-xs font-bold text-white">Guest</span>
                     <span id="nav-role" class="text-[10px] bg-blue-900/50 text-blue-300 px-1.5 rounded font-black uppercase">Driver</span>
-                </div>
+                </a>
             </div>
         </nav>
     </header>

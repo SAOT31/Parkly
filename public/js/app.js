@@ -106,6 +106,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (navLoginBtn) navLoginBtn.addEventListener('click', irALogin);
     if (heroLoginBtn) heroLoginBtn.addEventListener('click', irALogin);
-    
+
+    // --- 7. NAV AVATAR SETUP ---
+    const navAvatarImg  = document.getElementById('nav-avatar-img');
+    const navAvatarText = document.getElementById('nav-avatar-text');
+    const navUsernameEl = document.getElementById('nav-username');
+
+    if (session) {
+        if (navUsernameEl) navUsernameEl.textContent = session.name || session.email;
+
+        if (navAvatarText) {
+            const initials = (session.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            navAvatarText.textContent = initials;
+
+            const photo = localStorage.getItem(`parkly_avatar_${session.id}`);
+            if (photo && navAvatarImg) {
+                navAvatarImg.src = photo;
+                navAvatarImg.classList.remove('hidden');
+                navAvatarText.classList.add('hidden');
+            }
+        }
+    }
+
     if (window.lucide) lucide.createIcons();
 });

@@ -166,6 +166,105 @@ app.patch('/api/reservations/:id/status', async (req, res) => {
     }
 });
 
+// --- 5. USER PROFILE ---
+app.get('/api/users/:id', async (req, res) => {
+    const { id } = req.params;
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(
+            'SELECT id, name, email, role, phone FROM users WHERE id = ?', [id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found.' });
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Get User Error:', error.message);
+        res.status(500).json({ error: 'Failed to load user profile.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.patch('/api/users/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, phone } = req.body;
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE users SET name = ?, phone = ? WHERE id = ?', [name, phone || null, id]
+        );
+        const [rows] = await connection.execute(
+            'SELECT id, name, email, role, phone FROM users WHERE id = ?', [id]
+        );
+        console.log(`Profile updated for user ${id}`);
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Update User Error:', error.message);
+        res.status(500).json({ error: 'Failed to update profile.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.get('/api/reviews/user/:userId', async (req, res) => {
+    const { userId } = req.params;
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                reservation_id INT NOT NULL,
+                user_id INT NOT NULL,
+                parking_id INT NOT NULL,
+                rating INT NOT NULL,
+                comment TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        const [rows] = await connection.execute(`
+            SELECT rv.id, rv.rating, rv.comment, rv.created_at AS date,
+                   p.name AS spotName
+            FROM reviews rv
+            JOIN reservations r ON rv.reservation_id = r.id
+            JOIN parking_spots p ON rv.parking_id = p.id
+            WHERE rv.user_id = ?
+            ORDER BY rv.created_at DESC
+        `, [userId]);
+        res.json(rows);
+    } catch (error) {
+        console.error('Get Reviews Error:', error.message);
+        res.json([]);
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.post('/api/reviews', async (req, res) => {
+    const { reservationId, rating, comment } = req.body;
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const [resRows] = await connection.execute(
+            'SELECT client_id, parking_id FROM reservations WHERE id = ?', [reservationId]
+        );
+        if (resRows.length === 0) return res.status(404).json({ error: 'Reservation not found.' });
+        const { client_id, parking_id } = resRows[0];
+        const [result] = await connection.execute(
+            'INSERT INTO reviews (reservation_id, user_id, parking_id, rating, comment) VALUES (?, ?, ?, ?, ?)',
+            [reservationId, client_id, parking_id, rating, comment || null]
+        );
+        console.log(`Review submitted for reservation ${reservationId}`);
+        res.status(201).json({ id: result.insertId });
+    } catch (error) {
+        console.error('Submit Review Error:', error.message);
+        res.status(500).json({ error: 'Failed to submit review.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
 // --- 5. AI CHAT ---
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 

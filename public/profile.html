@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — PARKLY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            const t = localStorage.getItem('parkly_theme');
+            if (t === 'light') document.documentElement.classList.remove('dark');
+        })();
+    </script>
+</head>
+<body class="bg-background text-foreground min-h-screen font-sans antialiased">
+
+    <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4">
+        <nav class="max-w-3xl mx-auto flex justify-between items-center">
+            <a href="search.html" class="flex items-center gap-2 font-bold text-xl text-white group">
+                <i data-lucide="circle-parking" class="text-primary group-hover:rotate-12 transition-transform" aria-hidden="true"></i>
+                <span class="tracking-tighter uppercase italic">PARK<span class="text-primary">LY</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="dashboard.html" class="text-sm text-slate-400 hover:text-white transition-colors">My Bookings</a>
+                <a href="search.html" class="text-sm text-slate-400 hover:text-white transition-colors">Search</a>
+                <button id="theme-toggle" aria-label="Toggle theme" class="p-2 rounded-lg border border-border hover:border-primary/50 transition-colors"></button>
+                <button id="logout-btn" aria-label="Sign out" class="p-2 rounded-lg border border-border hover:border-red-500/50 text-slate-400 hover:text-red-400 transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4" aria-hidden="true"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 py-10">
+
+        <!-- Profile Card -->
+        <div class="bg-card border border-border rounded-3xl p-8 mb-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+
+                <!-- Avatar -->
+                <div class="relative flex-shrink-0">
+                    <div id="profile-avatar"
+                         class="w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-xl overflow-hidden cursor-pointer select-none"
+                         style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+                        <span id="profile-initials">?</span>
+                        <img id="profile-avatar-img" src="" alt="Profile photo" class="hidden w-full h-full object-cover">
+                    </div>
+                    <button id="avatar-btn"
+                            class="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors"
+                            title="Change photo" aria-label="Change profile photo">
+                        <i data-lucide="camera" class="w-4 h-4 text-white" aria-hidden="true"></i>
+                    </button>
+                    <input type="file" id="avatar-input" accept="image/*" class="hidden" aria-label="Upload profile photo">
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 w-full text-center sm:text-left">
+
+                    <!-- Display mode -->
+                    <div id="display-mode">
+                        <h1 id="profile-name" class="text-2xl font-extrabold text-white mb-1"></h1>
+                        <p class="text-sm text-slate-400 mb-1 flex items-center justify-center sm:justify-start gap-1.5">
+                            <i data-lucide="mail" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                            <span id="profile-email-text"></span>
+                        </p>
+                        <p class="text-sm text-slate-400 mb-3 flex items-center justify-center sm:justify-start gap-1.5">
+                            <i data-lucide="phone" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                            <span id="profile-phone-text">Not provided</span>
+                        </p>
+                        <div class="flex items-center gap-2 justify-center sm:justify-start flex-wrap">
+                            <span id="profile-role-badge" class="text-[10px] bg-blue-900/50 text-blue-300 px-2 py-0.5 rounded font-black uppercase">Client</span>
+                            <span id="profile-member-since" class="text-[10px] text-slate-600"></span>
+                        </div>
+                        <button id="btn-edit"
+                                class="mt-4 px-4 py-2 border border-border hover:border-primary/50 text-slate-400 hover:text-white rounded-xl text-sm font-semibold transition-all inline-flex items-center gap-2 mx-auto sm:mx-0">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5" aria-hidden="true"></i> Edit Profile
+                        </button>
+                    </div>
+
+                    <!-- Edit mode (hidden) -->
+                    <div id="edit-mode" class="hidden">
+                        <div class="mb-3">
+                            <label for="edit-name" class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Full Name</label>
+                            <input id="edit-name" type="text"
+                                   class="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/60 transition-colors">
+                        </div>
+                        <div class="mb-4">
+                            <label for="edit-phone" class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Phone</label>
+                            <input id="edit-phone" type="tel"
+                                   class="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/60 transition-colors">
+                        </div>
+                        <p id="edit-error" class="hidden text-red-400 text-xs mb-3"></p>
+                        <div class="flex gap-2">
+                            <button id="btn-save" class="px-4 py-2 bg-primary hover:opacity-90 text-white font-bold rounded-xl text-sm transition-all">Save</button>
+                            <button id="btn-cancel" class="px-4 py-2 border border-border text-slate-400 hover:text-white rounded-xl text-sm transition-all">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-card border border-border rounded-2xl p-4 text-center">
+                <p class="text-2xl font-extrabold text-white" id="stat-total">—</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Bookings</p>
+            </div>
+            <div class="bg-card border border-border rounded-2xl p-4 text-center">
+                <p class="text-2xl font-extrabold text-green-400" id="stat-completed">—</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Completed</p>
+            </div>
+            <div class="bg-card border border-border rounded-2xl p-4 text-center">
+                <p class="text-2xl font-extrabold text-violet-400" id="stat-places">—</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Places Visited</p>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <section class="bg-card border border-border rounded-2xl p-6 mb-6" aria-label="Recent activity">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white flex items-center gap-2 mb-4">
+                <i data-lucide="clock" class="w-4 h-4 text-primary" aria-hidden="true"></i> Recent Activity
+            </h2>
+            <ol id="recent-list" class="flex flex-col gap-0 list-none p-0 m-0" aria-label="Recent bookings"></ol>
+        </section>
+
+        <!-- My Reviews -->
+        <section class="bg-card border border-border rounded-2xl p-6 mb-6" aria-label="My reviews">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white flex items-center gap-2 mb-4">
+                <i data-lucide="star" class="w-4 h-4 text-yellow-400" aria-hidden="true"></i> My Reviews
+            </h2>
+            <div id="reviews-list" role="list"></div>
+        </section>
+
+
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
