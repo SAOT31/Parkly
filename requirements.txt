@@ -1,4 +1,5 @@
+pandas
 fastapi
-mysql-connector-python
 uvicorn
+mysql-connector-python
 python-dotenv
