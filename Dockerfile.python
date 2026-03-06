@@ -1,0 +1,17 @@
+# Usar una computadora virtual ligera con Python instalado
+FROM python:3.10-slim
+
+# Crear la carpeta de trabajo
+WORKDIR /app
+
+# Copiar la lista de librerías de Python
+COPY requirements.txt ./
+
+# Instalar las librerías sin guardar caché para ahorrar espacio
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+
+# Copiar el resto del código
+COPY . .
+
+# El comando para encender las estadísticas
+CMD ["python", "stats.py"]
