@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import OpenAI from 'openai';
 
 dotenv.config();
 
@@ -165,7 +166,32 @@ app.patch('/api/reservations/:id/status', async (req, res) => {
     }
 });
 
-// --- 5. SERVER STARTUP ---
+// --- 5. AI CHAT ---
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+app.post('/api/chat', async (req, res) => {
+    const { message, history = [] } = req.body;
+    try {
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: 'Eres el asistente virtual de Parkly, una app para reservar parqueaderos. Responde solo sobre temas relacionados con Parkly: buscar parqueaderos, hacer reservas, pagos, cancelaciones y gestión de cuenta. Sé breve y amable.'
+                },
+                ...history,
+                { role: 'user', content: message }
+            ],
+            max_tokens: 300,
+        });
+        res.json({ reply: completion.choices[0].message.content });
+    } catch (error) {
+        console.error('OpenAI Error:', error.message);
+        res.status(500).json({ error: 'AI service unavailable.' });
+    }
+});
+
+// --- 6. SERVER STARTUP ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log("-----------------------------------------");
