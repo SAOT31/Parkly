@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt ./
 
 # Instalar las librerías sin guardar caché para ahorrar espacio
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copiar el resto del código
 COPY . .
