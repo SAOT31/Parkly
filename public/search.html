@@ -291,59 +291,36 @@
         <div id="chatbox-messages" role="log" aria-live="polite" aria-label="Chat messages">
 
             <div class="chat-bubble bot welcome-bubble">
-                👋 Hey! I'm the <strong>PARKLY assistant</strong>.<br>
-                How can I help you today?
+                👋 Hola, soy el asistente de <strong>PARKLY</strong>.<br>
+                ¿Cómo te puedo ayudar?
             </div>
 
             <div class="quick-options" id="quick-options">
-                <p class="quick-options-label">Choose a topic:</p>
+                <p class="quick-options-label">¿En qué te ayudo?</p>
 
-                <button class="quick-btn" data-topic="find">
-                    <span class="quick-icon" aria-hidden="true">🔍</span>
-                    <div>
-                        <strong>Find a parking spot</strong>
-                        <small>Search available spaces near you</small>
-                    </div>
+                <button class="quick-btn" data-flow="1">
+                    <span class="quick-icon">🔍</span>
+                    <div><strong>1. Buscar parqueadero</strong><small>Filtros, zonas y disponibilidad</small></div>
                 </button>
 
-                <button class="quick-btn" data-topic="reserve">
-                    <span class="quick-icon" aria-hidden="true">📅</span>
-                    <div>
-                        <strong>Make a reservation</strong>
-                        <small>Book a spot in advance</small>
-                    </div>
+                <button class="quick-btn" data-flow="2">
+                    <span class="quick-icon">📅</span>
+                    <div><strong>2. Hacer una reserva</strong><small>Pasos para reservar un cupo</small></div>
                 </button>
 
-                <button class="quick-btn" data-topic="payment">
-                    <span class="quick-icon" aria-hidden="true">💳</span>
-                    <div>
-                        <strong>Payment & billing</strong>
-                        <small>Methods, invoices, refunds</small>
-                    </div>
+                <button class="quick-btn" data-flow="3">
+                    <span class="quick-icon">💳</span>
+                    <div><strong>3. Pagos y cancelaciones</strong><small>Cómo funciona el pago</small></div>
                 </button>
 
-                <button class="quick-btn" data-topic="cancel">
-                    <span class="quick-icon" aria-hidden="true">🔄</span>
-                    <div>
-                        <strong>Cancel a reservation</strong>
-                        <small>Modify or cancel your booking</small>
-                    </div>
+                <button class="quick-btn" data-flow="4">
+                    <span class="quick-icon">👤</span>
+                    <div><strong>4. Cuenta y acceso</strong><small>Login, registro, owner dashboard</small></div>
                 </button>
 
-                <button class="quick-btn" data-topic="account">
-                    <span class="quick-icon" aria-hidden="true">👤</span>
-                    <div>
-                        <strong>Account & access</strong>
-                        <small>Login issues, settings</small>
-                    </div>
-                </button>
-
-                <button class="quick-btn ai-btn" data-topic="ai">
-                    <span class="quick-icon ai-glow" aria-hidden="true">✨</span>
-                    <div>
-                        <strong>Ask AI assistant</strong>
-                        <small>Chat freely with our AI</small>
-                    </div>
+                <button class="quick-btn ai-btn" data-flow="ai">
+                    <span class="quick-icon ai-glow">✨</span>
+                    <div><strong>Hablar con la IA</strong><small>Chat libre con el asistente</small></div>
                     <span class="ai-chip">AI</span>
                 </button>
             </div>

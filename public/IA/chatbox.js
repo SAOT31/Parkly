@@ -1,57 +1,52 @@
 /* =========================================
    PARKLY — Chatbox Widget JS
-   Modo 1: Quick Replies (mensajes quemados)
+   Modo 1: Quick Replies (opciones 1-4)
    Modo 2: IA libre (conecta con backend)
    ========================================= */
 
 (function () {
 
     /* ── CONFIGURACIÓN ── */
-    const API_URL = "http://localhost:3000/chat";
+    const API_URL = "/api/chat";
 
     /* ── Estado ── */
-    let mode       = "quick"; // "quick" | "ai"
-    let aiHistory  = [];      // historial para el backend
+    let mode      = "menu"; // "menu" | "ai"
+    let aiHistory = [];
 
     /* ── DOM ── */
-    const toggle         = document.getElementById("chatbox-toggle");
-    const panel          = document.getElementById("chatbox-panel");
-    const messages       = document.getElementById("chatbox-messages");
-    const input          = document.getElementById("chatbox-input");
-    const sendBtn        = document.getElementById("chatbox-send");
-    const inputArea      = document.getElementById("chat-input-area");
-    const quickOptions   = document.getElementById("quick-options");
-    const backBtn        = document.getElementById("back-btn");
-    const modeBadge      = document.getElementById("mode-badge");
+    const toggle     = document.getElementById("chatbox-toggle");
+    const panel      = document.getElementById("chatbox-panel");
+    const messages   = document.getElementById("chatbox-messages");
+    const input      = document.getElementById("chatbox-input");
+    const sendBtn    = document.getElementById("chatbox-send");
+    const inputArea  = document.getElementById("chat-input-area");
+    const backBtn    = document.getElementById("back-btn");
+    const modeBadge  = document.getElementById("mode-badge");
 
     /* ─────────────────────────────────────────
-       MENSAJES QUEMADOS POR TOPIC
+       MENSAJES QUEMADOS — opciones 1 a 4
+       Solo información real del app
     ───────────────────────────────────────── */
     const FLOWS = {
-        find: [
-            { from: "bot",  text: "🔍 Sure! To find available parking near you, use the <strong>search bar</strong> at the top of the page." },
-            { from: "bot",  text: "You can filter by <strong>zone</strong>, <strong>price/hr</strong>, and features like EV charging or 24h access." },
-            { from: "bot",  text: "Spots marked <span style='color:#22c55e;font-weight:600'>Available</span> are ready to book right now. Need help narrowing it down?" },
+        1: [
+            { text: "🔍 Usa la <strong>barra de búsqueda</strong> en la parte superior para buscar por nombre, dirección o zona." },
+            { text: "En el panel izquierdo filtra por <strong>zona</strong>, <strong>precio máximo/hr</strong> y características: EV charging, 24h, seguridad, iluminado o verificado." },
+            { text: "Las tarjetas muestran badge <span style='color:#22c55e;font-weight:600'>Available</span> u <span style='color:#ef4444;font-weight:600'>Occupied</span>. Ordena por nombre, menor precio o mejor calificación." },
         ],
-        reserve: [
-            { from: "bot",  text: "📅 Making a reservation is easy! Click on any parking card and then hit <strong>Reserve</strong>." },
-            { from: "bot",  text: "Pick your <strong>date, start time and duration</strong>. The total cost will show before you confirm." },
-            { from: "bot",  text: "Once confirmed, you'll get a <strong>booking code</strong> by email. Show it at the entrance. Anything unclear?" },
+        2: [
+            { text: "📅 Haz clic en cualquier tarjeta de parqueadero para abrir su página de detalle." },
+            { text: "Selecciona <strong>fecha, hora de inicio y duración</strong>. El costo total se calcula automáticamente según la tarifa por hora." },
+            { text: "Al confirmar, tu reserva queda registrada con estado <strong>pendiente</strong> y aparece en el panel de reservas del dashboard." },
         ],
-        payment: [
-            { from: "bot",  text: "💳 Parkly accepts <strong>credit & debit cards</strong> (Visa, Mastercard, Amex) and <strong>digital wallets</strong>." },
-            { from: "bot",  text: "Your invoice is automatically sent to your registered email after each booking." },
-            { from: "bot",  text: "For refunds, go to <strong>My Reservations → Cancel</strong>. Refunds take 3–5 business days. Need more help?" },
+        3: [
+            { text: "💳 El pago se procesa desde la <strong>página de pago</strong> al confirmar tu reserva." },
+            { text: "El total se calcula con base en la <strong>tarifa por hora</strong> del parqueadero y la duración que elegiste." },
+            { text: "Para cancelar, cambia el estado de tu reserva a <strong>Cancelado</strong> desde el <strong>Dashboard</strong>." },
         ],
-        cancel: [
-            { from: "bot",  text: "🔄 To cancel, open the <strong>My Reservations</strong> section from your profile menu." },
-            { from: "bot",  text: "Select the booking and tap <strong>Cancel Reservation</strong>. Free cancellations are allowed up to <strong>1 hour before</strong> the start time." },
-            { from: "bot",  text: "After that window, a small fee may apply depending on the parking policy. Want to know anything else?" },
-        ],
-        account: [
-            { from: "bot",  text: "👤 For login issues, try <strong>Forgot Password</strong> on the login screen — we'll send a reset link." },
-            { from: "bot",  text: "If your account is locked or you can't access your email, contact us at <strong>soporte@parkly.co</strong>." },
-            { from: "bot",  text: "You can update your profile info, notification settings and linked cards from the <strong>Settings</strong> tab. Anything else?" },
+        4: [
+            { text: "👤 Para ingresar, ve a <strong>Login</strong> con tu email y contraseña registrados." },
+            { text: "¿No tienes cuenta? Usa <strong>Register</strong> e ingresa tu nombre, email y teléfono." },
+            { text: "Si eres propietario de un parqueadero, accede al <strong>Owner Dashboard</strong> para gestionar tus espacios y reservas." },
         ],
     };
 
@@ -62,9 +57,9 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    function addBubble(html, type = "bot", animate = true) {
+    function addBubble(html, type = "bot") {
         const div = document.createElement("div");
-        div.className = `chat-bubble ${type}${animate ? " bubble-in" : ""}`;
+        div.className = `chat-bubble ${type} bubble-in`;
         div.innerHTML = html;
         messages.appendChild(div);
         scrollBottom();
@@ -84,70 +79,103 @@
         return new Promise(r => setTimeout(r, ms));
     }
 
-    /* Elimina las opciones rápidas del DOM */
-    function removeQuickOptions() {
-        if (quickOptions && quickOptions.parentNode) {
-            quickOptions.style.opacity = "0";
-            quickOptions.style.transform = "translateY(6px)";
-            setTimeout(() => quickOptions.remove(), 250);
-        }
-    }
-
-    /* Muestra el input area con animación */
     function showInputArea() {
         inputArea.style.display = "flex";
         requestAnimationFrame(() => inputArea.classList.add("visible"));
         setTimeout(() => input.focus(), 100);
     }
 
-    /* Actualiza el badge de modo */
+    function hideInputArea() {
+        inputArea.classList.remove("visible");
+        setTimeout(() => { inputArea.style.display = "none"; }, 300);
+    }
+
     function setModeBadge(isAI) {
+        const star = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
         modeBadge.innerHTML = isAI
-            ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-               </svg><span>AI Mode</span>`
-            : `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-               </svg><span>Quick Replies</span>`;
+            ? `${star}<span>AI Mode</span>`
+            : `${star}<span>Quick Replies</span>`;
         modeBadge.classList.toggle("ai-active", isAI);
     }
 
     /* ─────────────────────────────────────────
-       MODO 1: QUICK REPLIES (flows)
+       MENÚ PRINCIPAL
     ───────────────────────────────────────── */
-    async function runFlow(topic) {
-        const steps = FLOWS[topic];
+    function buildMenu() {
+        const wrap = document.createElement("div");
+        wrap.className = "quick-options";
+        wrap.id = "quick-options";
+        wrap.innerHTML = `
+            <p class="quick-options-label">¿En qué te ayudo?</p>
+            <button class="quick-btn" data-flow="1">
+                <span class="quick-icon">🔍</span>
+                <div><strong>1. Buscar parqueadero</strong><small>Filtros, zonas y disponibilidad</small></div>
+            </button>
+            <button class="quick-btn" data-flow="2">
+                <span class="quick-icon">📅</span>
+                <div><strong>2. Hacer una reserva</strong><small>Pasos para reservar un cupo</small></div>
+            </button>
+            <button class="quick-btn" data-flow="3">
+                <span class="quick-icon">💳</span>
+                <div><strong>3. Pagos y cancelaciones</strong><small>Cómo funciona el pago</small></div>
+            </button>
+            <button class="quick-btn" data-flow="4">
+                <span class="quick-icon">👤</span>
+                <div><strong>4. Cuenta y acceso</strong><small>Login, registro, owner dashboard</small></div>
+            </button>
+            <button class="quick-btn ai-btn" data-flow="ai">
+                <span class="quick-icon ai-glow">✨</span>
+                <div><strong>Hablar con la IA</strong><small>Chat libre con el asistente</small></div>
+                <span class="ai-chip">AI</span>
+            </button>
+        `;
+        return wrap;
+    }
+
+    function resetToMenu() {
+        messages.innerHTML = `
+            <div class="chat-bubble bot welcome-bubble bubble-in">
+                👋 Hola, soy el asistente de <strong>PARKLY</strong>.<br>
+                ¿Cómo te puedo ayudar?
+            </div>
+        `;
+        messages.appendChild(buildMenu());
+        hideInputArea();
+        mode = "menu";
+        aiHistory = [];
+        setModeBadge(false);
+    }
+
+    /* ─────────────────────────────────────────
+       MODO 1: QUICK REPLIES
+    ───────────────────────────────────────── */
+    async function runFlow(num) {
+        const steps = FLOWS[num];
         if (!steps) return;
 
-        removeQuickOptions();
-        showInputArea();
-        mode = "quick";
-        setModeBadge(false);
+        // Quitar menú del DOM
+        const opts = document.getElementById("quick-options");
+        if (opts) opts.remove();
 
         for (let i = 0; i < steps.length; i++) {
             await delay(i === 0 ? 400 : 900);
-            const typing = showTyping();
+            const t = showTyping();
             await delay(800);
-            typing.remove();
-            addBubble(steps[i].text, steps[i].from);
+            t.remove();
+            addBubble(steps[i].text, "bot");
         }
 
-        // Al final de cada flow, ofrecer continuar con IA
-        await delay(1000);
-        const typing = showTyping();
-        await delay(700);
-        typing.remove();
+        await delay(900);
+        const t = showTyping();
+        await delay(600);
+        t.remove();
 
         const followUp = document.createElement("div");
         followUp.className = "chat-bubble bot bubble-in";
-        followUp.innerHTML = `
-            Still have questions? 
-            <button class="inline-ai-btn" id="inline-ai-btn">✨ Ask AI directly</button>
-        `;
+        followUp.innerHTML = `¿Necesitas algo más? <button class="inline-ai-btn" id="btn-back-menu">← Volver al menú</button>`;
         messages.appendChild(followUp);
         scrollBottom();
-
-        document.getElementById("inline-ai-btn")?.addEventListener("click", activateAIMode);
+        document.getElementById("btn-back-menu")?.addEventListener("click", resetToMenu);
     }
 
     /* ─────────────────────────────────────────
@@ -156,148 +184,81 @@
     function activateAIMode() {
         mode = "ai";
         setModeBadge(true);
-        removeQuickOptions();
+        const opts = document.getElementById("quick-options");
+        if (opts) opts.remove();
         showInputArea();
 
-        // Mensaje de transición
-        const typing = showTyping();
+        const t = showTyping();
         setTimeout(() => {
-            typing.remove();
-            addBubble(
-                "✨ <strong>AI mode activated.</strong> You can now ask me anything about Parkly — reservations, payments, parking availability, or account help. Go ahead!",
-                "bot"
-            );
+            t.remove();
+            addBubble("✨ <strong>Modo IA activado.</strong> Puedes preguntarme lo que quieras sobre Parkly. ¡Adelante!", "bot");
         }, 900);
     }
 
     async function getAIReply(userText) {
         aiHistory.push({ role: "user", content: userText });
-
-        const typing = showTyping();
+        const t = showTyping();
         try {
-            const response = await fetch(API_URL, {
+            const res = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userText, history: aiHistory }),
             });
-
-            if (!response.ok) throw new Error("Servidor no respondió");
-
-            const data = await response.json();
-            typing.remove();
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            t.remove();
             addBubble(data.reply, "bot");
-
-            // Guardar respuesta en historial
             aiHistory.push({ role: "assistant", content: data.reply });
-
-            // Limitar historial a 20 mensajes
             if (aiHistory.length > 20) aiHistory = aiHistory.slice(-20);
-
-        } catch (err) {
-            typing.remove();
-            console.error("Error IA:", err);
-            addBubble("⚠️ Couldn't connect to the assistant. Please try again.", "bot");
+        } catch {
+            t.remove();
+            addBubble("⚠️ No se pudo conectar con el asistente. Intenta de nuevo.", "bot");
         }
     }
 
     /* ─────────────────────────────────────────
        EVENTOS
     ───────────────────────────────────────── */
-
-    /* Botones de opciones rápidas */
     document.addEventListener("click", (e) => {
-        const btn = e.target.closest(".quick-btn");
+        const btn = e.target.closest("[data-flow]");
         if (!btn) return;
-
-        const topic = btn.dataset.topic;
-        if (topic === "ai") {
+        const flow = btn.dataset.flow;
+        if (flow === "ai") {
             activateAIMode();
         } else {
-            runFlow(topic);
+            runFlow(flow);
         }
     });
 
-    /* Botón volver al menú */
-    backBtn.addEventListener("click", () => {
-        // Limpiar chat y volver al estado inicial
-        messages.innerHTML = `
-            <div class="chat-bubble bot welcome-bubble bubble-in">
-                👋 Hey! I'm the <strong>PARKLY assistant</strong>.<br>
-                How can I help you today?
-            </div>
-        `;
-        // Re-insertar opciones rápidas
-        const opts = buildQuickOptions();
-        messages.appendChild(opts);
+    backBtn.addEventListener("click", resetToMenu);
 
-        inputArea.classList.remove("visible");
-        setTimeout(() => { inputArea.style.display = "none"; }, 300);
-
-        mode = "quick";
-        aiHistory = [];
-        setModeBadge(false);
-    });
-
-    function buildQuickOptions() {
-        const topics = [
-            { topic: "find",    icon: "🔍", title: "Find a parking spot",      sub: "Search available spaces near you" },
-            { topic: "reserve", icon: "📅", title: "Make a reservation",        sub: "Book a spot in advance" },
-            { topic: "payment", icon: "💳", title: "Payment & billing",         sub: "Methods, invoices, refunds" },
-            { topic: "cancel",  icon: "🔄", title: "Cancel a reservation",      sub: "Modify or cancel your booking" },
-            { topic: "account", icon: "👤", title: "Account & access",          sub: "Login issues, settings" },
-        ];
-
-        const wrap = document.createElement("div");
-        wrap.className = "quick-options";
-        wrap.id = "quick-options";
-
-        wrap.innerHTML = `<p class="quick-options-label">Choose a topic:</p>` +
-            topics.map(t => `
-                <button class="quick-btn" data-topic="${t.topic}">
-                    <span class="quick-icon">${t.icon}</span>
-                    <div><strong>${t.title}</strong><small>${t.sub}</small></div>
-                </button>
-            `).join("") +
-            `<button class="quick-btn ai-btn" data-topic="ai">
-                <span class="quick-icon ai-glow">✨</span>
-                <div><strong>Ask AI assistant</strong><small>Chat freely with our AI</small></div>
-                <span class="ai-chip">AI</span>
-            </button>`;
-
-        return wrap;
-    }
-
-    /* Abrir / cerrar chat */
     toggle.addEventListener("click", () => {
         const isOpen = panel.classList.toggle("open");
         toggle.classList.toggle("open", isOpen);
         if (isOpen && mode === "ai") setTimeout(() => input.focus(), 350);
     });
 
-    /* Enviar mensaje (solo en modo AI) */
     function sendMessage() {
         if (mode !== "ai") return;
         const text = input.value.trim();
         if (!text) return;
-
         addBubble(text, "user");
         input.value = "";
         input.style.height = "auto";
-
         getAIReply(text);
     }
 
     sendBtn.addEventListener("click", sendMessage);
     input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
-
     input.addEventListener("input", () => {
         input.style.height = "auto";
         input.style.height = Math.min(input.scrollHeight, 100) + "px";
     });
+
+    /* ── INICIALIZACIÓN ── */
+    // El menú ya viene en el HTML, solo aseguramos que el input esté oculto
+    inputArea.style.display = "none";
 
 })();
